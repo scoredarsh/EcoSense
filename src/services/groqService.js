@@ -1,6 +1,6 @@
 /**
  * Groq Vision Service — Drop-in replacement for geminiService.
- * Uses Llama 4 Scout (17B) via Groq's OpenAI-compatible API.
+ * Uses Gemini AI (17B) via Groq's OpenAI-compatible API.
  * Free tier: 30 req/min, 14,400 req/day.
  */
 
@@ -69,7 +69,7 @@ If the image does NOT show garbage or waste, respond with:
 {"isGarbage": false, "wasteType": "None", "severityScore": 0, "description": "This image does not appear to contain waste or pollution.", "recommendation": "No action needed.", "confidence": 0.9}`
 
 /**
- * Analyze an uploaded waste image using Groq Vision (Llama 4 Scout) with retry logic.
+ * Analyze an uploaded waste image using Groq Vision (Gemini AI) with retry logic.
  * Retries up to 3 times with exponential backoff on rate-limit (429) errors.
  * @param {string} base64Image - The image as a data URL (data:image/...;base64,...)
  * @returns {Promise<Object>} Analysis result with severity, type, description, isGarbage

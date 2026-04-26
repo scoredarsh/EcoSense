@@ -1273,6 +1273,59 @@
             margin-top: 4px
         }
 
+        /* ── AI VERIFICATION UI ── */
+        .ai-verify-panel {
+            margin: 18px 0 8px;
+            padding: 16px 18px;
+            border-radius: 14px;
+            background: rgba(34, 197, 94, .04);
+            border: 1px solid var(--glass-b);
+            display: none;
+        }
+        .ai-verify-panel.show { display: block; }
+        .ai-verify-panel.pass {
+            border-color: rgba(34,197,94,.4);
+            background: rgba(34,197,94,.08);
+        }
+        .ai-verify-panel.fail {
+            border-color: rgba(239,68,68,.4);
+            background: rgba(239,68,68,.08);
+        }
+        .ai-verify-header {
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Syne', sans-serif; font-size: .88rem;
+            font-weight: 800; margin-bottom: 8px;
+        }
+        .ai-verify-body {
+            font-size: .8rem; color: var(--tm); line-height: 1.6;
+        }
+        .ai-verify-body strong { color: var(--tp); }
+        .btn-ai-verify {
+            background: linear-gradient(135deg, #1e3a5f, #60a5fa);
+            color: #fff;
+            box-shadow: 0 0 18px rgba(96,165,250,.2);
+        }
+        .btn-ai-verify:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 32px rgba(96,165,250,.35);
+        }
+        .btn-ai-verify:disabled {
+            opacity: .5; cursor: not-allowed;
+            transform: none !important;
+        }
+        .btn-primary:disabled {
+            opacity: .35; cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        .ai-spinner {
+            display: inline-block; width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: #fff; border-radius: 50%;
+            animation: spin .7s linear infinite;
+            vertical-align: middle; margin-right: 6px;
+        }
+
         /* Full completion modal */
         .modal-overlay {
             display: none;
@@ -1859,6 +1912,248 @@
                 grid-template-columns: 1fr
             }
         }
+
+        /* ═══════════════════════════════════════════════
+   CITIZEN REPORTS (LIVE FIRESTORE)
+   ═══════════════════════════════════════════════ */
+        .citizen-reports-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .cr-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cr-card {
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid var(--glass-b);
+            border-radius: var(--r);
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            transition: border-color .22s, transform .22s;
+        }
+
+        .cr-card:hover {
+            border-color: var(--glass-bb);
+            transform: translateY(-2px);
+        }
+
+        .cr-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(34, 197, 94, .08);
+        }
+
+        .cr-sev-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .cr-sev-badge.sev-low {
+            background: rgba(34, 197, 94, .12);
+            color: var(--gb);
+            border: 1px solid var(--glass-bb);
+        }
+
+        .cr-sev-badge.sev-medium {
+            background: rgba(96, 165, 250, .12);
+            color: var(--blue);
+            border: 1px solid rgba(96, 165, 250, .3);
+        }
+
+        .cr-sev-badge.sev-high {
+            background: rgba(245, 158, 11, .12);
+            color: var(--amber);
+            border: 1px solid rgba(245, 158, 11, .3);
+        }
+
+        .cr-sev-badge.sev-critical {
+            background: rgba(239, 68, 68, .12);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, .3);
+        }
+
+        .cr-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cr-title {
+            font-family: 'Syne', sans-serif;
+            font-size: .95rem;
+            font-weight: 800;
+            color: var(--tp);
+            margin-bottom: 3px;
+        }
+
+        .cr-address {
+            font-size: .76rem;
+            color: var(--tm);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cr-card-body {
+            padding: 18px 24px;
+        }
+
+        .cr-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .cr-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(34, 197, 94, .06);
+            border: 1px solid var(--glass-b);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: .72rem;
+            color: var(--ts);
+        }
+
+        .cr-desc {
+            font-size: .82rem;
+            color: var(--tm);
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .cr-reporter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .74rem;
+            color: var(--tm);
+            padding: 10px 24px;
+            background: rgba(34, 197, 94, .03);
+            border-top: 1px solid rgba(34, 197, 94, .06);
+        }
+
+        .cr-reporter-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gd), var(--gb));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+
+        .cr-ai-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: .65rem;
+            font-weight: 700;
+        }
+
+        .cr-ai-tag.verified {
+            background: rgba(34, 197, 94, .12);
+            color: var(--gb);
+            border: 1px solid var(--glass-bb);
+        }
+
+        .cr-ai-tag.unverified {
+            background: rgba(245, 158, 11, .12);
+            color: var(--amber);
+            border: 1px solid rgba(245, 158, 11, .3);
+        }
+
+        .cr-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 11px;
+            border-radius: 20px;
+            font-size: .68rem;
+            font-weight: 700;
+        }
+
+        .cr-status-pill.st-pending {
+            background: rgba(245, 158, 11, .12);
+            color: var(--amber);
+        }
+
+        .cr-status-pill.st-opted {
+            background: rgba(96, 165, 250, .12);
+            color: var(--blue);
+        }
+
+        .cr-status-pill.st-resolved {
+            background: rgba(34, 197, 94, .12);
+            color: var(--gb);
+        }
+
+        .cr-empty {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--tm);
+        }
+
+        .cr-empty .cr-empty-icon {
+            font-size: 48px;
+            opacity: .4;
+            margin-bottom: 12px;
+        }
+
+        .cr-loading {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--tm);
+        }
+
+        .cr-loading .spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--glass-b);
+            border-top-color: var(--gc);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .cr-stats-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        @media(max-width:700px) {
+            .cr-stats-strip {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -1874,6 +2169,7 @@
                 <button class="nav-tab active" onclick="switchTab(this,'reports')">📋 Reports</button>
                 <button class="nav-tab" onclick="switchTab(this,'missions')">🎯 Missions</button>
                 <button class="nav-tab" onclick="switchTab(this,'volunteers')">🙋 Volunteers</button>
+                <button class="nav-tab" onclick="switchTab(this,'citizen-reports')">🗂️ Citizen Reports</button>
             </div>
             <div class="nav-right">
                 <div class="ngo-badge">
@@ -1904,20 +2200,24 @@
                     <div class="sb-icon">🙋</div> Volunteer Pool
                     <span class="sb-badge green">23</span>
                 </a>
-                <a class="sb-item">
+                <a class="sb-item" onclick="showSection('analytics')">
                     <div class="sb-icon">📊</div> Impact Analytics
                 </a>
-                <a class="sb-item">
+                <a class="sb-item" onclick="showSection('calendar')">
                     <div class="sb-icon">📅</div> Drive Calendar
                 </a>
 
                 <div class="sb-label">Settings</div>
-                <a class="sb-item">
+                <a class="sb-item" onclick="showSection('profile')">
                     <div class="sb-icon">⚙️</div> NGO Profile
                 </a>
-                <a class="sb-item">
+                <a class="sb-item" onclick="showSection('citizen-reports')">
+                    <div class="sb-icon">🗂️</div> Citizen Reports
+                    <span class="sb-badge green" id="sb-cr-count">0</span>
+                </a>
+                <a class="sb-item" onclick="showSection('notifications')">
                     <div class="sb-icon">🔔</div> Notifications
-                    <span class="sb-badge red">3</span>
+                    <span class="sb-badge red" id="notif-badge">3</span>
                 </a>
 
                 <div class="sb-div"></div>
@@ -1945,7 +2245,7 @@
                     </div>
                     <div class="hdr-actions">
                         <button class="btn btn-ghost" onclick="toast('📡 Data refreshed!','success')">↻ Sync</button>
-                        <button class="btn btn-primary" onclick="showSection('reports')">📋 View Reports</button>
+                        <button class="btn btn-primary" onclick="switchTab(document.querySelectorAll('.nav-tab')[3],'citizen-reports')">📋 View Reports</button>
                     </div>
                 </div>
 
@@ -2303,6 +2603,67 @@
                             </div>
                         </div>
 
+                        <!-- Dynamic citizen reports from Firestore -->
+                        <div id="citizen-reco-list"></div>
+
+                    </div>
+                </section>
+
+                <!-- ═══════════════════════════════════════════════════
+                     CITIZEN REPORTS — Live from Firestore
+                     ═══════════════════════════════════════════════════ -->
+                <section id="sec-citizen-reports" class="citizen-reports-section" style="display:none">
+                    <div>
+                        <div class="sl">Live Citizen Reports</div>
+                        <h2 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.5px">
+                            Reports from Citizens
+                        </h2>
+                        <p style="font-size:.82rem;color:var(--tm);margin-top:4px">
+                            Real-time waste reports submitted by citizens through the EcoSense app, with AI severity scoring and live GPS locations.
+                        </p>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="cr-stats-strip">
+                        <div class="glass sc anim">
+                            <div class="sc-lbl">Total Reports</div>
+                            <div class="sc-val" id="cr-total">0</div>
+                            <div class="sc-sub" id="cr-total-sub">Loading…</div>
+                            <div class="sc-ico">📋</div>
+                        </div>
+                        <div class="glass sc red anim">
+                            <div class="sc-lbl">High / Critical</div>
+                            <div class="sc-val" id="cr-urgent">0</div>
+                            <div class="sc-sub" id="cr-urgent-sub">Needs attention</div>
+                            <div class="sc-ico">🚨</div>
+                        </div>
+                        <div class="glass sc anim">
+                            <div class="sc-lbl">AI Verified</div>
+                            <div class="sc-val" id="cr-verified">0</div>
+                            <div class="sc-sub">Verified by Gemini AI</div>
+                            <div class="sc-ico">🤖</div>
+                        </div>
+                    </div>
+
+                    <!-- Filter -->
+                    <div class="filter-bar">
+                        <button class="filter-pill active" onclick="setCRFilter(this,'all')">All Reports</button>
+                        <button class="filter-pill red-pill" onclick="setCRFilter(this,'critical')">🔴 Critical</button>
+                        <button class="filter-pill amber-pill" onclick="setCRFilter(this,'high')">🟡 High</button>
+                        <button class="filter-pill" onclick="setCRFilter(this,'medium')">🔵 Medium</button>
+                        <button class="filter-pill" onclick="setCRFilter(this,'low')">🟢 Low</button>
+                        <div class="search-box">
+                            <span style="color:var(--tm);font-size:14px">🔍</span>
+                            <input placeholder="Search reports…" oninput="filterCRSearch(this.value)" />
+                        </div>
+                    </div>
+
+                    <!-- Report cards rendered here -->
+                    <div class="cr-grid" id="cr-list">
+                        <div class="cr-loading">
+                            <div class="spinner"></div>
+                            <p>Loading citizen reports from database…</p>
+                        </div>
                     </div>
                 </section>
 
@@ -2317,137 +2678,16 @@
                         </p>
                     </div>
 
-                    <div class="active-missions-grid">
-
-                        <div class="glass mission-card">
-                            <span class="mc-badge mcb-active">🔵 In Progress</span>
-                            <h4>Construction Debris — 80 Feet Road</h4>
-                            <div class="mc-meta">📍 Indiranagar · Opted in 1 day ago · 3 volunteers assigned</div>
-                            <div class="progress-steps">
-                                <div class="ps-step done">
-                                    <div class="ps-circle">✓</div>
-                                </div>
-                                <div class="ps-line" style="background:var(--gc)"></div>
-                                <div class="ps-step done">
-                                    <div class="ps-circle">✓</div>
-                                </div>
-                                <div class="ps-line"></div>
-                                <div class="ps-step active">
-                                    <div class="ps-circle">3</div>
-                                </div>
-                                <div class="ps-line"></div>
-                                <div class="ps-step">
-                                    <div class="ps-circle">4</div>
-                                </div>
-                            </div>
-                            <div
-                                style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--tm);margin-bottom:14px">
-                                <span>Opted In</span><span>Team Assigned</span><span>Cleanup</span><span>Verified</span>
-                            </div>
-                            <p style="font-size:.8rem;color:var(--tm);margin-bottom:16px;line-height:1.6">
-                                Cleanup of construction debris on 80 Feet Road is underway. Upload before/after photos
-                                to close this mission.
-                            </p>
-                            <button class="btn btn-primary btn-full"
-                                onclick="openCompletion('rc4','Construction Debris — 80 Feet Road')">
-                                📸 Upload Before/After Photos
-                            </button>
-                        </div>
-
-                        <div class="glass mission-card" style="border-color:rgba(245,158,11,.25)">
-                            <span class="mc-badge mcb-pending">⏳ Awaiting Evidence</span>
-                            <h4>Overflowing Landfill — 5th Block</h4>
-                            <div class="mc-meta">📍 Koramangala · Opted in 3 hr ago · 5 volunteers assigned</div>
-                            <div class="progress-steps">
-                                <div class="ps-step done">
-                                    <div class="ps-circle">✓</div>
-                                </div>
-                                <div class="ps-line" style="background:var(--gc)"></div>
-                                <div class="ps-step done">
-                                    <div class="ps-circle">✓</div>
-                                </div>
-                                <div class="ps-line" style="background:var(--gc)"></div>
-                                <div class="ps-step done">
-                                    <div class="ps-circle">✓</div>
-                                </div>
-                                <div class="ps-line"></div>
-                                <div class="ps-step active">
-                                    <div class="ps-circle">4</div>
-                                </div>
-                            </div>
-                            <div
-                                style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--tm);margin-bottom:14px">
-                                <span>Opted In</span><span>Team Assigned</span><span>Cleanup</span><span>Verified</span>
-                            </div>
-                            <p style="font-size:.8rem;color:var(--tm);margin-bottom:16px;line-height:1.6">
-                                Cleanup completed by team. Now upload before and after photos to officially verify and
-                                close this report.
-                            </p>
-                            <button class="btn btn-amber btn-full"
-                                onclick="openCompletion('rc1','Overflowing Landfill — 5th Block')">
-                                📸 Submit Verification Photos
-                            </button>
-                        </div>
-
-                        <div class="glass mission-card" style="border-color:rgba(74,222,128,.3);opacity:.85">
-                            <span class="mc-badge mcb-done">✅ Verified Complete</span>
-                            <h4>Food Waste — BTM 2nd Stage</h4>
-                            <div class="mc-meta">📍 BTM Layout · Resolved 2 days ago · Impact: High</div>
-                            <div class="progress-steps">
-                                <div class="ps-step done">
-                                    <div class="ps-circle">✓</div>
-                                </div>
-                                <div class="ps-line" style="background:var(--gc)"></div>
-                                <div class="ps-step done">
-                                    <div class="ps-circle">✓</div>
-                                </div>
-                                <div class="ps-line" style="background:var(--gc)"></div>
-                                <div class="ps-step done">
-                                    <div class="ps-circle">✓</div>
-                                </div>
-                                <div class="ps-line" style="background:var(--gc)"></div>
-                                <div class="ps-step done">
-                                    <div class="ps-circle">✓</div>
-                                </div>
-                            </div>
-                            <div
-                                style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--tm);margin-bottom:14px">
-                                <span>Opted In</span><span>Team Assigned</span><span>Cleanup</span><span>Verified</span>
-                            </div>
-
-                            <div class="ba-grid" style="pointer-events:none">
-                                <div class="ba-zone has-image" style="border-style:solid;padding:8px">
-                                    <div style="position:relative">
-                                        <div
-                                            style="height:90px;background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(239,68,68,.05));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px">
-                                            📷</div>
-                                        <span class="ba-label ba-before">BEFORE</span>
-                                    </div>
-                                </div>
-                                <div class="ba-zone has-image" style="border-style:solid;padding:8px">
-                                    <div style="position:relative">
-                                        <div
-                                            style="height:90px;background:linear-gradient(135deg,rgba(34,197,94,.2),rgba(34,197,94,.05));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px">
-                                            📷</div>
-                                        <span class="ba-label ba-after">AFTER</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <p style="font-size:.76rem;color:var(--gc);margin-top:6px;font-weight:600">
-                                ✓ Evidence verified · +350 XP earned · Report closed
-                            </p>
-                        </div>
-
+                    <div class="active-missions-grid" id="missions-grid">
+                        <!-- Dynamically populated by JS -->
                         <div class="glass mission-card"
                             style="border-style:dashed;border-color:var(--glass-b);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px">
                             <div style="font-size:40px;opacity:.25;margin-bottom:12px">🎯</div>
                             <p style="font-size:.85rem;color:var(--tm);text-align:center;margin-bottom:16px">
-                                Opt into more reports<br>to create new missions
+                                No active missions yet.<br>Opt into reports to create missions.
                             </p>
-                            <button class="btn btn-ghost btn-sm" onclick="showSection('reports')">Browse Reports
-                                →</button>
+                            <button class="btn btn-ghost btn-sm" onclick="showSection('reports')">Browse Reports →</button>
                         </div>
-
                     </div>
                 </section>
 
@@ -2779,6 +3019,161 @@
                     </div>
                 </section>
 
+                <!-- IMPACT ANALYTICS -->
+                <section id="sec-analytics" style="display:none;flex-direction:column;gap:28px">
+                    <div><div class="sl">Performance Metrics</div>
+                        <h2 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.5px">Impact Analytics</h2>
+                        <p style="font-size:.82rem;color:var(--tm);margin-top:4px">Track your NGO's environmental impact and cleanup performance.</p>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
+                        <div class="glass sc anim"><div class="sc-lbl">Total Cleanups</div><div class="sc-val">84</div><div class="sc-sub">↑ 12 this month</div><div class="sc-ico">🧹</div></div>
+                        <div class="glass sc amber anim"><div class="sc-lbl">Waste Removed</div><div class="sc-val" style="color:var(--amber)">2.4T</div><div class="sc-sub">Tonnes total</div><div class="sc-ico">⚖️</div></div>
+                        <div class="glass sc blue anim"><div class="sc-lbl">Volunteer Hours</div><div class="sc-val" style="color:var(--blue)">1,240</div><div class="sc-sub">↑ 18% vs last month</div><div class="sc-ico">⏱️</div></div>
+                        <div class="glass sc anim"><div class="sc-lbl">Areas Covered</div><div class="sc-val">16</div><div class="sc-sub">Bengaluru zones</div><div class="sc-ico">📍</div></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                        <div class="glass" style="padding:24px;border-radius:var(--r)">
+                            <h4 style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:16px">Monthly Trend</h4>
+                            <div style="display:flex;align-items:flex-end;gap:8px;height:140px;padding-top:10px">
+                                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:linear-gradient(to top,var(--gd),var(--gc));border-radius:6px 6px 0 0;height:40%"></div><span style="font-size:.6rem;color:var(--tm)">Jan</span></div>
+                                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:linear-gradient(to top,var(--gd),var(--gc));border-radius:6px 6px 0 0;height:55%"></div><span style="font-size:.6rem;color:var(--tm)">Feb</span></div>
+                                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:linear-gradient(to top,var(--gd),var(--gc));border-radius:6px 6px 0 0;height:45%"></div><span style="font-size:.6rem;color:var(--tm)">Mar</span></div>
+                                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:linear-gradient(to top,var(--gd),var(--gb));border-radius:6px 6px 0 0;height:80%"></div><span style="font-size:.6rem;color:var(--tm)">Apr</span></div>
+                            </div>
+                        </div>
+                        <div class="glass" style="padding:24px;border-radius:var(--r)">
+                            <h4 style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:16px">Top Waste Types</h4>
+                            <div style="display:flex;flex-direction:column;gap:12px">
+                                <div><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px"><span>🗑️ Household</span><span style="color:var(--gc)">38%</span></div><div style="height:8px;background:rgba(34,197,94,.1);border-radius:4px"><div style="width:38%;height:100%;background:var(--gc);border-radius:4px"></div></div></div>
+                                <div><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px"><span>🏗️ Construction</span><span style="color:var(--amber)">24%</span></div><div style="height:8px;background:rgba(245,158,11,.1);border-radius:4px"><div style="width:24%;height:100%;background:var(--amber);border-radius:4px"></div></div></div>
+                                <div><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px"><span>🏭 Industrial</span><span style="color:var(--red)">18%</span></div><div style="height:8px;background:rgba(239,68,68,.1);border-radius:4px"><div style="width:18%;height:100%;background:var(--red);border-radius:4px"></div></div></div>
+                                <div><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px"><span>♻️ Recyclable</span><span style="color:var(--blue)">20%</span></div><div style="height:8px;background:rgba(96,165,250,.1);border-radius:4px"><div style="width:20%;height:100%;background:var(--blue);border-radius:4px"></div></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass" style="padding:24px;border-radius:var(--r)">
+                        <h4 style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:16px">Leaderboard — Top Volunteers</h4>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+                            <div style="text-align:center;padding:18px;background:rgba(34,197,94,.05);border:1px solid var(--glass-b);border-radius:14px"><div style="font-size:28px;margin-bottom:6px">🥇</div><div style="font-weight:700;font-size:.88rem">Priya Menon</div><div style="font-size:.72rem;color:var(--gc)">4,820 XP · 28 missions</div></div>
+                            <div style="text-align:center;padding:18px;background:rgba(34,197,94,.05);border:1px solid var(--glass-b);border-radius:14px"><div style="font-size:28px;margin-bottom:6px">🥈</div><div style="font-weight:700;font-size:.88rem">Arjun Rao</div><div style="font-size:.72rem;color:var(--tm)">4,410 XP · 24 missions</div></div>
+                            <div style="text-align:center;padding:18px;background:rgba(34,197,94,.05);border:1px solid var(--glass-b);border-radius:14px"><div style="font-size:28px;margin-bottom:6px">🥉</div><div style="font-weight:700;font-size:.88rem">Sneha Patel</div><div style="font-size:.72rem;color:var(--tm)">3,980 XP · 21 missions</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DRIVE CALENDAR -->
+                <section id="sec-calendar" style="display:none;flex-direction:column;gap:28px">
+                    <div><div class="sl">Upcoming Drives</div>
+                        <h2 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.5px">Drive Calendar</h2>
+                        <p style="font-size:.82rem;color:var(--tm);margin-top:4px">Scheduled cleanup drives and community events for your NGO.</p>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:16px">
+                        <div class="glass" style="padding:20px 24px;border-radius:var(--r);border-left:4px solid var(--gc);display:flex;align-items:center;gap:18px">
+                            <div style="text-align:center;min-width:56px"><div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--gb)">28</div><div style="font-size:.68rem;color:var(--tm);text-transform:uppercase;font-weight:700">Apr</div></div>
+                            <div style="flex:1"><div style="font-weight:700;font-size:.92rem;margin-bottom:2px">🌊 Varthur Lake Cleanup Drive</div><div style="font-size:.76rem;color:var(--tm)">📍 Varthur Lake Road · 6:00 AM – 10:00 AM · 12 volunteers confirmed</div></div>
+                            <span style="padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:700;background:rgba(34,197,94,.12);color:var(--gc);border:1px solid rgba(34,197,94,.3)">Upcoming</span>
+                        </div>
+                        <div class="glass" style="padding:20px 24px;border-radius:var(--r);border-left:4px solid var(--amber);display:flex;align-items:center;gap:18px">
+                            <div style="text-align:center;min-width:56px"><div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--amber)">02</div><div style="font-size:.68rem;color:var(--tm);text-transform:uppercase;font-weight:700">May</div></div>
+                            <div style="flex:1"><div style="font-weight:700;font-size:.92rem;margin-bottom:2px">🏗️ Construction Debris Clearance</div><div style="font-size:.76rem;color:var(--tm)">📍 80 Feet Road, Indiranagar · 7:00 AM – 12:00 PM · 8 volunteers needed</div></div>
+                            <span style="padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:700;background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.3)">Planning</span>
+                        </div>
+                        <div class="glass" style="padding:20px 24px;border-radius:var(--r);border-left:4px solid var(--blue);display:flex;align-items:center;gap:18px">
+                            <div style="text-align:center;min-width:56px"><div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--blue)">10</div><div style="font-size:.68rem;color:var(--tm);text-transform:uppercase;font-weight:700">May</div></div>
+                            <div style="flex:1"><div style="font-weight:700;font-size:.92rem;margin-bottom:2px">📢 Community Awareness Workshop</div><div style="font-size:.76rem;color:var(--tm)">📍 Koramangala Community Hall · 4:00 PM – 6:00 PM · Open to public</div></div>
+                            <span style="padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:700;background:rgba(96,165,250,.12);color:var(--blue);border:1px solid rgba(96,165,250,.3)">Event</span>
+                        </div>
+                        <div class="glass" style="padding:20px 24px;border-radius:var(--r);border-left:4px solid var(--gc);display:flex;align-items:center;gap:18px;opacity:.6">
+                            <div style="text-align:center;min-width:56px"><div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--gc)">22</div><div style="font-size:.68rem;color:var(--tm);text-transform:uppercase;font-weight:700">Apr</div></div>
+                            <div style="flex:1"><div style="font-weight:700;font-size:.92rem;margin-bottom:2px">🗑️ BTM Market Waste Clearance</div><div style="font-size:.76rem;color:var(--tm)">📍 BTM 2nd Stage · Completed · 6 volunteers participated</div></div>
+                            <span style="padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:700;background:rgba(74,222,128,.12);color:var(--gc);border:1px solid rgba(74,222,128,.3)">✅ Done</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="toast('📅 New drive form coming soon!','info')" style="align-self:flex-start">+ Schedule New Drive</button>
+                </section>
+
+                <!-- NGO PROFILE -->
+                <section id="sec-profile" style="display:none;flex-direction:column;gap:28px">
+                    <div><div class="sl">Organization Settings</div>
+                        <h2 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.5px">NGO Profile</h2>
+                        <p style="font-size:.82rem;color:var(--tm);margin-top:4px">Manage your organization's details and verification status.</p>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                        <div class="glass" style="padding:28px;border-radius:var(--r)">
+                            <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+                                <div style="width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--gd),var(--gb));display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 20px var(--gg)">♻️</div>
+                                <div><div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800">GreenBridge NGO</div><div style="font-size:.76rem;color:var(--gc)">🟢 Verified Partner · Since 2023</div></div>
+                            </div>
+                            <div class="fg"><label>Organization Name</label><input class="fc" value="GreenBridge Environmental Trust" /></div>
+                            <div class="fg"><label>Registration ID</label><input class="fc" value="KA-NGO-2023-04821" readonly style="opacity:.7" /></div>
+                            <div class="fg"><label>Primary Contact Email</label><input class="fc" value="ops@greenbridge.ngo.in" /></div>
+                            <div class="fg"><label>Phone</label><input class="fc" value="+91 80 4567 8900" /></div>
+                            <button class="btn btn-primary" onclick="toast('✅ Profile updated!','success')">Save Changes</button>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:18px">
+                            <div class="glass" style="padding:24px;border-radius:var(--r)">
+                                <h4 style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:14px">Coverage Areas</h4>
+                                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                                    <span style="padding:5px 12px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(34,197,94,.1);border:1px solid var(--glass-b);color:var(--ts)">📍 Koramangala</span>
+                                    <span style="padding:5px 12px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(34,197,94,.1);border:1px solid var(--glass-b);color:var(--ts)">📍 Indiranagar</span>
+                                    <span style="padding:5px 12px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(34,197,94,.1);border:1px solid var(--glass-b);color:var(--ts)">📍 HSR Layout</span>
+                                    <span style="padding:5px 12px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(34,197,94,.1);border:1px solid var(--glass-b);color:var(--ts)">📍 BTM Layout</span>
+                                    <span style="padding:5px 12px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(34,197,94,.1);border:1px solid var(--glass-b);color:var(--ts)">📍 Whitefield</span>
+                                </div>
+                            </div>
+                            <div class="glass" style="padding:24px;border-radius:var(--r)">
+                                <h4 style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:14px">Verification</h4>
+                                <div style="display:flex;flex-direction:column;gap:10px">
+                                    <div style="display:flex;align-items:center;gap:8px;font-size:.82rem"><span style="color:var(--gc)">✅</span> NGO Darpan Verified</div>
+                                    <div style="display:flex;align-items:center;gap:8px;font-size:.82rem"><span style="color:var(--gc)">✅</span> 12A Tax Exemption</div>
+                                    <div style="display:flex;align-items:center;gap:8px;font-size:.82rem"><span style="color:var(--gc)">✅</span> 80G Certification</div>
+                                    <div style="display:flex;align-items:center;gap:8px;font-size:.82rem"><span style="color:var(--gc)">✅</span> BBMP Partnership Agreement</div>
+                                </div>
+                            </div>
+                            <div class="glass" style="padding:24px;border-radius:var(--r)">
+                                <h4 style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:10px">NGO Code</h4>
+                                <div style="display:flex;gap:8px"><input class="fc" value="GREENBRIDGE-BLR" readonly style="font-family:monospace" /><button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('GREENBRIDGE-BLR');toast('📋 Copied!','success')">Copy</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- NOTIFICATIONS -->
+                <section id="sec-notifications" style="display:none;flex-direction:column;gap:28px">
+                    <div><div class="sl">Activity Feed</div>
+                        <h2 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.5px">Notifications</h2>
+                        <p style="font-size:.82rem;color:var(--tm);margin-top:4px">Recent activity, alerts, and updates for your NGO.</p>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-bottom:4px">
+                        <button class="filter-pill active" onclick="filterNotifs(this,'all')">All</button>
+                        <button class="filter-pill red-pill" onclick="filterNotifs(this,'urgent')">🔴 Urgent</button>
+                        <button class="filter-pill" onclick="filterNotifs(this,'info')">ℹ️ Info</button>
+                        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="document.querySelectorAll('.notif-item').forEach(n=>n.style.opacity='.5');toast('✅ All marked as read','success');document.getElementById('notif-badge').textContent='0'">Mark All Read</button>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:10px" id="notif-list">
+                        <div class="glass notif-item" data-type="urgent" style="padding:16px 20px;border-radius:var(--r);border-left:3px solid var(--red);display:flex;align-items:flex-start;gap:14px">
+                            <span style="font-size:20px">🚨</span>
+                            <div style="flex:1"><div style="font-weight:700;font-size:.85rem;margin-bottom:2px">Critical report in Koramangala — Severity 9/10</div><div style="font-size:.74rem;color:var(--tm)">A new high-severity waste dump was reported near 5th Block. Immediate action recommended.</div><div style="font-size:.66rem;color:var(--tm);margin-top:6px">2 min ago</div></div>
+                        </div>
+                        <div class="glass notif-item" data-type="urgent" style="padding:16px 20px;border-radius:var(--r);border-left:3px solid var(--amber);display:flex;align-items:flex-start;gap:14px">
+                            <span style="font-size:20px">⚠️</span>
+                            <div style="flex:1"><div style="font-weight:700;font-size:.85rem;margin-bottom:2px">Volunteer Kiran Sharma requested reassignment</div><div style="font-size:.74rem;color:var(--tm)">Currently assigned to 80 Feet Road. Requesting transfer to Varthur Lake Drive.</div><div style="font-size:.66rem;color:var(--tm);margin-top:6px">1 hr ago</div></div>
+                        </div>
+                        <div class="glass notif-item" data-type="info" style="padding:16px 20px;border-radius:var(--r);border-left:3px solid var(--gc);display:flex;align-items:flex-start;gap:14px;opacity:.7">
+                            <span style="font-size:20px">✅</span>
+                            <div style="flex:1"><div style="font-weight:700;font-size:.85rem;margin-bottom:2px">Mission "Food Waste — BTM" verified complete</div><div style="font-size:.74rem;color:var(--tm)">Before/after evidence approved. +350 XP credited to your NGO.</div><div style="font-size:.66rem;color:var(--tm);margin-top:6px">3 hr ago</div></div>
+                        </div>
+                        <div class="glass notif-item" data-type="info" style="padding:16px 20px;border-radius:var(--r);border-left:3px solid var(--blue);display:flex;align-items:flex-start;gap:14px;opacity:.7">
+                            <span style="font-size:20px">👤</span>
+                            <div style="flex:1"><div style="font-weight:700;font-size:.85rem;margin-bottom:2px">New volunteer registered: Lakshmi Nair</div><div style="font-size:.74rem;color:var(--tm)">Skills: Educator, Schools · Area: BTM Layout · Available Mon–Sun</div><div style="font-size:.66rem;color:var(--tm);margin-top:6px">5 hr ago</div></div>
+                        </div>
+                        <div class="glass notif-item" data-type="info" style="padding:16px 20px;border-radius:var(--r);border-left:3px solid var(--glass-b);display:flex;align-items:flex-start;gap:14px;opacity:.5">
+                            <span style="font-size:20px">📊</span>
+                            <div style="flex:1"><div style="font-weight:700;font-size:.85rem;margin-bottom:2px">Weekly impact report generated</div><div style="font-size:.74rem;color:var(--tm)">Your NGO resolved 8 reports this week. View full report in Impact Analytics.</div><div style="font-size:.66rem;color:var(--tm);margin-top:6px">1 day ago</div></div>
+                        </div>
+                    </div>
+                </section>
+
             </main>
         </div>
         <div class="modal-overlay" id="completion-modal">
@@ -2839,20 +3234,45 @@
                     <input class="fc" id="modal-vols" placeholder="e.g. Priya M., Arjun R., Sneha P." />
                 </div>
 
+                <!-- AI Verification Result Panel -->
+                <div class="ai-verify-panel" id="ai-verify-panel">
+                    <div class="ai-verify-header" id="ai-verify-header">🤖 AI Verification</div>
+                    <div class="ai-verify-body" id="ai-verify-body"></div>
+                </div>
+
                 <div class="modal-footer">
                     <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="submitCompletion()">✅ Submit Verification</button>
+                    <button class="btn btn-ai-verify" id="btn-ai-verify" onclick="verifyWithAI()" disabled>🤖 Verify with AI</button>
+                    <button class="btn btn-primary" id="btn-submit-completion" onclick="submitCompletion()" disabled>✅ Submit Verification</button>
                 </div>
             </div>
         </div>
 
         <div id="toast-root"></div>
 
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
         <script>
+            /* ══════════════════════════════════
+               FIREBASE INIT
+               ══════════════════════════════════ */
+            const firebaseConfig = {
+                apiKey: 'AIzaSyDLNK0QpClFKDXL2Yj0_vEhYK7YPkQUdew',
+                authDomain: 'ecosense-78022.firebaseapp.com',
+                projectId: 'ecosense-78022',
+                storageBucket: 'ecosense-78022.firebasestorage.app',
+                messagingSenderId: '572515784160',
+                appId: '1:572515784160:web:7f22c9c9cd759fff9b4785',
+            };
+            const fbApp = firebase.initializeApp(firebaseConfig);
+            const fbDb = firebase.firestore();
+
             /* ══════════════════════════════════
                NAV TABS & SECTION SWITCHING
                ══════════════════════════════════ */
-            const SECTIONS = { reports: 'sec-reports', missions: 'sec-missions', volunteers: 'sec-volunteers' };
+            const SECTIONS = { reports: 'sec-reports', missions: 'sec-missions', volunteers: 'sec-volunteers', 'citizen-reports': 'sec-citizen-reports', analytics: 'sec-analytics', calendar: 'sec-calendar', profile: 'sec-profile', notifications: 'sec-notifications' };
 
             function showSection(key) {
                 Object.values(SECTIONS).forEach(id => {
@@ -2885,30 +3305,37 @@
                 const card = document.getElementById(cardId);
                 if (!card) return;
 
-                // Show inline confirm
+                // Remove any existing banner first
+                const old = document.getElementById('optin-banner');
+                if (old) old.remove();
+
                 const confirmBanner = document.createElement('div');
+                confirmBanner.id = 'optin-banner';
                 confirmBanner.style.cssText = `
-    position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-    background:rgba(10,22,16,.97);border:1px solid var(--glass-bb);
-    border-radius:16px;padding:20px 28px;z-index:600;
-    text-align:center;max-width:420px;width:90%;
-    box-shadow:0 20px 60px rgba(0,0,0,.5);
-    animation:slideUp .25s ease;
-  `;
+                    position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+                    background:rgba(10,22,16,.97);border:1px solid var(--glass-bb);
+                    border-radius:16px;padding:20px 28px;z-index:600;
+                    text-align:center;max-width:420px;width:90%;
+                    box-shadow:0 20px 60px rgba(0,0,0,.5);animation:slideUp .25s ease;`;
+                const safeTitle = title.replace(/'/g, "\\'");
                 confirmBanner.innerHTML = `
-    <div style="font-size:28px;margin-bottom:10px">🎯</div>
-    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--tp);margin-bottom:6px">Opt In to This Mission?</div>
-    <div style="font-size:.8rem;color:var(--tm);margin-bottom:18px;line-height:1.6">${title}<br>Your NGO will be responsible for resolving this issue.</div>
-    <div style="display:flex;gap:10px;justify-content:center">
-      <button onclick="confirmOptIn('${cardId}','${title}',this.closest('[style]'))" class="btn btn-primary btn-sm">✅ Confirm Opt-In</button>
-      <button onclick="this.closest('[style]').remove()" class="btn btn-ghost btn-sm">Cancel</button>
-    </div>
-  `;
+                    <div style="font-size:28px;margin-bottom:10px">🎯</div>
+                    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--tp);margin-bottom:6px">Opt In to This Mission?</div>
+                    <div style="font-size:.8rem;color:var(--tm);margin-bottom:18px;line-height:1.6">${title}<br>Your NGO will be responsible for resolving this issue.</div>
+                    <div style="display:flex;gap:10px;justify-content:center">
+                        <button onclick="confirmOptIn('${cardId}','${safeTitle}')" class="btn btn-primary btn-sm">✅ Confirm Opt-In</button>
+                        <button onclick="dismissBanner()" class="btn btn-ghost btn-sm">Cancel</button>
+                    </div>`;
                 document.body.appendChild(confirmBanner);
             }
 
-            function confirmOptIn(cardId, title, banner) {
-                if (banner) banner.remove();
+            function dismissBanner() {
+                const b = document.getElementById('optin-banner');
+                if (b) b.remove();
+            }
+
+            function confirmOptIn(cardId, title) {
+                dismissBanner();
                 const card = document.getElementById(cardId);
                 if (!card) return;
 
@@ -2916,21 +3343,32 @@
                 card.dataset.opted = 'true';
 
                 // Replace action button
+                const safeTitle = title.replace(/'/g, "\\'");
                 const actionWrap = card.querySelector('.rc-actions');
-                actionWrap.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="openCompletion('${cardId}','${title}')">✅ Mark Complete</button>`;
+                actionWrap.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="openCompletion('${cardId}','${safeTitle}')">✅ Mark Complete</button>`;
 
                 // Add status bar
                 if (!card.querySelector('.status-bar')) {
                     const sb = document.createElement('div');
                     sb.className = 'status-bar';
                     sb.innerHTML = `
-      <span class="status-dot" style="background:var(--amber)"></span>
-      <span class="st-label">Mission Accepted</span>
-      <span class="st-sub">· Just now · Assign volunteers</span>
-      <button class="btn btn-primary btn-sm ml-auto" onclick="showSection('volunteers')">Assign Volunteers →</button>
-    `;
+                        <span class="status-dot" style="background:var(--amber)"></span>
+                        <span class="st-label">Mission Accepted</span>
+                        <span class="st-sub">· Just now · Assign volunteers</span>
+                        <button class="btn btn-primary btn-sm ml-auto" onclick="showSection('volunteers')">Assign Volunteers →</button>`;
                     card.appendChild(sb);
                 }
+
+                // Also add to active missions
+                activeMissions.push({
+                    id: cardId,
+                    reportId: null,
+                    title: title,
+                    priority: card.dataset.priority || 'medium',
+                    optedAt: new Date(),
+                    status: 'in-progress'
+                });
+                renderActiveMissions();
 
                 toast(`🎯 Opted in: "${title.substring(0, 32)}…"`, 'success');
                 toast('🙋 Head to Volunteers to assign your team!', 'info');
@@ -3005,6 +3443,8 @@
                 clearModalImg(null, 'after');
                 document.getElementById('modal-notes').value = '';
                 document.getElementById('modal-vols').value = '';
+                resetAIVerification();
+                updateVerifyBtnState();
                 document.getElementById('completion-modal').classList.add('open');
             }
 
@@ -3032,6 +3472,9 @@
                     document.getElementById(`modal-${side}-preview`).style.display = 'block';
                     document.getElementById(`modal-${side}-zone`).classList.add('has-img');
                     toast(`📸 ${side === 'before' ? 'Before' : 'After'} photo loaded!`, 'success');
+                    // Reset AI verification when images change
+                    resetAIVerification();
+                    updateVerifyBtnState();
                 };
                 reader.readAsDataURL(file);
             }
@@ -3042,13 +3485,154 @@
                 document.getElementById(`modal-${side}-content`).style.display = 'block';
                 document.getElementById(`modal-${side}-preview`).style.display = 'none';
                 document.getElementById(`modal-${side}-zone`).classList.remove('has-img');
+                resetAIVerification();
+                updateVerifyBtnState();
+            }
+
+            /* ══════════════════════════════════
+               AI IMAGE COMPARISON (GEMINI)
+               ══════════════════════════════════ */
+            const GEMINI_API_KEY = 'AIzaSyB8ylYk4nWBdcB_eQMYthBx3J_WOv6jVos';
+            let aiVerificationPassed = false;
+
+            function updateVerifyBtnState() {
+                const bSrc = document.getElementById('modal-before-img').src;
+                const aSrc = document.getElementById('modal-after-img').src;
+                const hasBoth = bSrc && bSrc !== '' && bSrc !== window.location.href &&
+                                aSrc && aSrc !== '' && aSrc !== window.location.href;
+                document.getElementById('btn-ai-verify').disabled = !hasBoth;
+            }
+
+            function resetAIVerification() {
+                aiVerificationPassed = false;
+                const panel = document.getElementById('ai-verify-panel');
+                panel.classList.remove('show', 'pass', 'fail');
+                document.getElementById('btn-submit-completion').disabled = true;
+            }
+
+            function compressForGemini(base64Str, maxDim) {
+                maxDim = maxDim || 512;
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let w = img.width, h = img.height;
+                        if (w > h) { if (w > maxDim) { h = Math.round(h * maxDim / w); w = maxDim; } }
+                        else { if (h > maxDim) { w = Math.round(w * maxDim / h); h = maxDim; } }
+                        const c = document.createElement('canvas');
+                        c.width = w; c.height = h;
+                        c.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(c.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.onerror = () => resolve(base64Str);
+                    img.src = base64Str;
+                });
+            }
+
+            async function verifyWithAI() {
+                const bSrc = document.getElementById('modal-before-img').src;
+                const aSrc = document.getElementById('modal-after-img').src;
+                if (!bSrc || !aSrc) { toast('⚠️ Upload both images first', 'warn'); return; }
+
+                const verifyBtn = document.getElementById('btn-ai-verify');
+                const panel = document.getElementById('ai-verify-panel');
+                const header = document.getElementById('ai-verify-header');
+                const body = document.getElementById('ai-verify-body');
+
+                // Show loading state
+                verifyBtn.disabled = true;
+                verifyBtn.innerHTML = '<span class="ai-spinner"></span> Analyzing…';
+                panel.className = 'ai-verify-panel show';
+                header.innerHTML = '🤖 AI is comparing images…';
+                body.innerHTML = '<em>Sending before & after photos to Gemini Vision for analysis. This may take a few seconds…</em>';
+
+                try {
+                    const [compBefore, compAfter] = await Promise.all([
+                        compressForGemini(bSrc), compressForGemini(aSrc)
+                    ]);
+
+                    const bData = compBefore.split(',')[1];
+                    const bMime = compBefore.match(/data:(.*?);/)?.[1] || 'image/jpeg';
+                    const aData = compAfter.split(',')[1];
+                    const aMime = compAfter.match(/data:(.*?);/)?.[1] || 'image/jpeg';
+
+                    const prompt = `You are an environmental cleanup verification AI for EcoSense.
+You are given two images:
+- IMAGE 1 (BEFORE): The site before cleanup.
+- IMAGE 2 (AFTER): The site after cleanup.
+
+Compare these two images and determine:
+1. Is there a VISIBLE and MEANINGFUL change indicating cleanup has occurred? (e.g., garbage removed, area cleaned, waste cleared)
+2. Provide a brief explanation of what changed (or didn't change).
+3. Rate your confidence from 0.0 to 1.0.
+
+IMPORTANT: Respond ONLY with valid JSON, no markdown:
+{"changeDetected": true, "summary": "...", "confidence": 0.92}
+
+If both images look essentially the same (no cleanup done), respond:
+{"changeDetected": false, "summary": "...", "confidence": 0.85}`;
+
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+                    const resp = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [
+                                    { text: prompt },
+                                    { inlineData: { mimeType: bMime, data: bData } },
+                                    { inlineData: { mimeType: aMime, data: aData } }
+                                ]
+                            }]
+                        })
+                    });
+
+                    if (!resp.ok) {
+                        const errText = await resp.text();
+                        throw new Error(`API ${resp.status}: ${errText.substring(0, 200)}`);
+                    }
+
+                    const data = await resp.json();
+                    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    text = text.trim();
+                    if (text.startsWith('```')) text = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
+
+                    const result = JSON.parse(text);
+                    const passed = result.changeDetected === true;
+                    const conf = Math.round((result.confidence || 0) * 100);
+
+                    if (passed) {
+                        aiVerificationPassed = true;
+                        panel.className = 'ai-verify-panel show pass';
+                        header.innerHTML = '✅ Cleanup Verified by AI';
+                        body.innerHTML = `<strong>Change detected</strong> (${conf}% confidence)<br>${result.summary}<br><br><em style="color:var(--gc)">You may now submit the verification.</em>`;
+                        document.getElementById('btn-submit-completion').disabled = false;
+                        toast('✅ AI confirmed cleanup — you can now submit!', 'success');
+                    } else {
+                        aiVerificationPassed = false;
+                        panel.className = 'ai-verify-panel show fail';
+                        header.innerHTML = '❌ No Change Detected by AI';
+                        body.innerHTML = `<strong>No meaningful cleanup detected</strong> (${conf}% confidence)<br>${result.summary}<br><br><em style="color:var(--red)">Please upload valid before/after photos showing the actual cleanup.</em>`;
+                        document.getElementById('btn-submit-completion').disabled = true;
+                        toast('❌ AI did not detect a change. Upload correct images.', 'warn');
+                    }
+                } catch (err) {
+                    console.error('AI verification error:', err);
+                    panel.className = 'ai-verify-panel show fail';
+                    header.innerHTML = '⚠️ AI Verification Failed';
+                    body.innerHTML = `<strong>Could not complete verification:</strong> ${err.message}<br><br><em>Please try again. If the issue persists, check your API quota.</em>`;
+                    toast('⚠️ AI verification failed. Please retry.', 'error');
+                } finally {
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerHTML = '🤖 Verify with AI';
+                }
             }
 
             function submitCompletion() {
-                const bSrc = document.getElementById('modal-before-img').src;
-                const aSrc = document.getElementById('modal-after-img').src;
-                if (!bSrc) { toast('⚠️ Please upload the BEFORE photo', 'warn'); return; }
-                if (!aSrc) { toast('⚠️ Please upload the AFTER photo', 'warn'); return; }
+                if (!aiVerificationPassed) {
+                    toast('⚠️ AI must verify the images before you can submit', 'warn');
+                    return;
+                }
 
                 // Mark card as resolved
                 if (currentCompletionCard) {
@@ -3056,14 +3640,26 @@
                     if (card) {
                         card.classList.add('resolved');
                         const sb = card.querySelector('.status-bar');
-                        if (sb) { sb.style.background = 'rgba(34,197,94,.08)'; sb.innerHTML = `<span class="status-dot" style="background:var(--gc)"></span><span class="st-label" style="color:var(--gb)">✅ Verified Complete</span><span class="st-sub">· Evidence submitted · +350 XP</span>`; }
+                        if (sb) { sb.style.background = 'rgba(34,197,94,.08)'; sb.innerHTML = `<span class="status-dot" style="background:var(--gc)"></span><span class="st-label" style="color:var(--gb)">✅ AI Verified Complete</span><span class="st-sub">· Evidence verified by Gemini AI · +350 XP</span>`; }
                         const btn = card.querySelector('.rc-actions button');
                         if (btn) { btn.textContent = '✓ Resolved'; btn.disabled = true; btn.style.opacity = '.5'; }
+                    }
+
+                    // Update active mission status
+                    const mission = activeMissions.find(m => m.id === currentCompletionCard);
+                    if (mission) {
+                        mission.status = 'resolved';
+                        // Update Firestore if linked to a citizen report
+                        if (mission.reportId) {
+                            fbDb.collection('waste_reports').doc(mission.reportId).update({ status: 'resolved' })
+                                .catch(err => console.error('Resolve update error:', err));
+                        }
+                        renderActiveMissions();
                     }
                 }
 
                 closeModal();
-                toast('🎉 Mission verified! Great work, EcoWarriors.', 'success');
+                toast('🎉 Mission verified by AI! Great work, EcoWarriors.', 'success');
                 setTimeout(() => toast('🏅 +350 XP earned for GreenBridge NGO', 'info'), 1200);
                 setTimeout(() => toast('📋 Report marked as Resolved in community feed', 'success'), 2400);
             }
@@ -3108,6 +3704,403 @@
             // Welcome toasts
             setTimeout(() => toast('🌿 Welcome back, GreenBridge NGO!', 'success'), 600);
             setTimeout(() => toast('🔴 2 critical reports need urgent attention', 'warn'), 1800);
+
+            /* ══════════════════════════════════
+               CITIZEN REPORTS — FIRESTORE
+               ══════════════════════════════════ */
+            let allCitizenReports = [];
+
+            function severityLabel(score) {
+                if (score <= 3) return 'low';
+                if (score <= 6) return 'medium';
+                if (score <= 8) return 'high';
+                return 'critical';
+            }
+
+            function severityEmoji(sev) {
+                return { low: '🟢', medium: '🔵', high: '🟡', critical: '🔴' }[sev] || '⚪';
+            }
+
+            function wasteTypeEmoji(type) {
+                const map = { General: '🗑️', Industrial: '🏭', Hazardous: '⚗️', Recyclable: '♻️', 'Water Body': '🌊', 'Forest Area': '🌳' };
+                return map[type] || '🗑️';
+            }
+
+            function statusPill(status) {
+                const map = {
+                    pending:  '<span class="cr-status-pill st-pending">⏳ Pending</span>',
+                    'opted-in': '<span class="cr-status-pill st-opted">🎯 Opted In</span>',
+                    resolved: '<span class="cr-status-pill st-resolved">✅ Resolved</span>',
+                };
+                return map[status] || map.pending;
+            }
+
+            function formatTimestamp(ts) {
+                if (!ts) return 'Just now';
+                const d = ts.toDate ? ts.toDate() : new Date(ts);
+                const now = new Date();
+                const diff = Math.floor((now - d) / 1000);
+                if (diff < 60) return 'Just now';
+                if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+                if (diff < 86400) return Math.floor(diff / 3600) + ' hr ago';
+                return Math.floor(diff / 86400) + ' day(s) ago';
+            }
+
+            function renderCitizenReports(reports) {
+                const list = document.getElementById('cr-list');
+
+                // Stats
+                const total = reports.length;
+                const urgent = reports.filter(r => r.severityScore >= 7).length;
+                const verified = reports.filter(r => r.aiVerified).length;
+                document.getElementById('cr-total').textContent = total;
+                document.getElementById('cr-total-sub').textContent = total > 0 ? `${reports.filter(r => r.status === 'pending').length} pending` : 'No reports yet';
+                document.getElementById('cr-urgent').textContent = urgent;
+                document.getElementById('cr-urgent-sub').textContent = urgent > 0 ? 'Needs attention' : 'All clear';
+                document.getElementById('cr-verified').textContent = verified;
+
+                // Sidebar badge
+                const badge = document.getElementById('sb-cr-count');
+                if (badge) badge.textContent = total;
+
+                if (reports.length === 0) {
+                    list.innerHTML = `<div class="cr-empty"><div class="cr-empty-icon">📭</div><p>No citizen reports yet. Reports submitted via the EcoSense app will appear here in real time.</p></div>`;
+                    return;
+                }
+
+                list.innerHTML = reports.map((r, i) => {
+                    const sev = r.severity || severityLabel(r.severityScore || 0);
+                    const sevClass = 'sev-' + sev;
+                    const score = r.severityScore || 0;
+                    const addr = r.locationAddress || 'Location not available';
+                    const desc = r.description || 'No description provided.';
+                    const type = r.wasteType || 'General';
+                    const reporter = r.reporterName || 'Anonymous';
+                    const time = formatTimestamp(r.createdAt);
+                    const aiTag = r.aiVerified
+                        ? '<span class="cr-ai-tag verified">🤖 AI Verified</span>'
+                        : '<span class="cr-ai-tag unverified">⚠️ Manual</span>';
+                    const confidence = r.aiConfidence ? Math.round(r.aiConfidence * 100) + '%' : 'N/A';
+                    const recommendation = r.aiRecommendation || '';
+
+                    return `
+                    <div class="cr-card" data-severity="${sev}" data-search="${(type + ' ' + addr + ' ' + desc + ' ' + reporter).toLowerCase()}">
+                        <div class="cr-card-header">
+                            <div class="cr-sev-badge ${sevClass}">${score}</div>
+                            <div class="cr-info">
+                                <div class="cr-title">${wasteTypeEmoji(type)} ${type} Waste — Severity ${score}/10</div>
+                                <div class="cr-address">📍 ${addr}</div>
+                            </div>
+                            <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+                                ${aiTag}
+                                ${statusPill(r.status)}
+                            </div>
+                        </div>
+                        <div class="cr-card-body">
+                            ${r.imageUrl ? '<div style="margin-bottom:12px;border-radius:10px;overflow:hidden;max-height:220px"><img src="' + r.imageUrl + '" style="width:100%;height:auto;display:block;object-fit:cover;max-height:220px" alt="Reported waste" /></div>' : ''}
+                            <div class="cr-meta-row">
+                                <span class="cr-chip"><span class="mc-icon">${wasteTypeEmoji(type)}</span> ${type}</span>
+                                <span class="cr-chip"><span class="mc-icon">${severityEmoji(sev)}</span> ${sev.charAt(0).toUpperCase() + sev.slice(1)} Severity</span>
+                                <span class="cr-chip"><span class="mc-icon">🕐</span> ${time}</span>
+                                <span class="cr-chip"><span class="mc-icon">🎯</span> Confidence: ${confidence}</span>
+                                <span class="cr-chip"><span class="mc-icon">📌</span> ${r.lat ? r.lat.toFixed(4) + ', ' + r.lng.toFixed(4) : 'N/A'}</span>
+                            </div>
+                            <p class="cr-desc">${desc}</p>
+                            ${r.aiDescription ? '<p class="cr-desc" style="color:var(--ts);font-size:.78rem">🤖 <strong>AI Analysis:</strong> ' + r.aiDescription + '</p>' : ''}
+                            ${recommendation ? '<p class="cr-desc" style="color:var(--gb);font-size:.78rem">💡 <strong>AI Recommendation:</strong> ' + recommendation + '</p>' : ''}
+                        </div>
+                        <div class="cr-reporter">
+                            <div class="cr-reporter-avatar">🌿</div>
+                            <span>Reported by <strong style="color:var(--ts)">${reporter}</strong></span>
+                            <span style="margin-left:auto;color:var(--tm);font-size:.68rem">#RPT-${(r.id || '').slice(0, 8).toUpperCase()}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // Real-time Firestore listener
+            fbDb.collection('waste_reports')
+                .orderBy('createdAt', 'desc')
+                .onSnapshot(snapshot => {
+                    allCitizenReports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderCitizenReports(allCitizenReports);
+                    renderCitizenRecoCards(allCitizenReports);
+                }, err => {
+                    console.error('Firestore listen error:', err);
+                    document.getElementById('cr-list').innerHTML = `<div class="cr-empty"><div class="cr-empty-icon">⚠️</div><p>Could not load reports. Check Firebase configuration.</p></div>`;
+                });
+
+            /* ── CITIZEN REPORTS FILTER ── */
+            function setCRFilter(el, type) {
+                el.closest('.filter-bar').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                el.classList.add('active');
+                const cards = document.querySelectorAll('#cr-list .cr-card');
+                cards.forEach(card => {
+                    const sev = card.dataset.severity;
+                    card.style.display = (type === 'all' || sev === type) ? '' : 'none';
+                });
+            }
+
+            function filterCRSearch(val) {
+                const q = val.toLowerCase();
+                document.querySelectorAll('#cr-list .cr-card').forEach(card => {
+                    card.style.display = (card.dataset.search || '').includes(q) ? '' : 'none';
+                });
+            }
+
+            /* ══════════════════════════════════
+               CITIZEN REPORTS → REPORT RECOMMENDATIONS
+               ══════════════════════════════════ */
+            function getPriorityBadge(sev) {
+                const map = {
+                    critical: '<span class="priority-badge pb-critical">🔴 CRITICAL</span>',
+                    high: '<span class="priority-badge pb-high">🟡 HIGH</span>',
+                    medium: '<span class="priority-badge pb-medium">🔵 MEDIUM</span>',
+                    low: '<span class="priority-badge pb-low">🟢 LOW</span>',
+                };
+                return map[sev] || map.low;
+            }
+
+            function getOptBtnClass(sev) {
+                if (sev === 'critical') return 'btn-danger';
+                if (sev === 'high') return 'btn-amber';
+                return 'btn-ghost';
+            }
+
+            function getScoreColor(sev) {
+                const map = { critical: '#ef4444', high: '#f59e0b', medium: '#60a5fa', low: '#4ade80' };
+                return map[sev] || '#4ade80';
+            }
+
+            function renderCitizenRecoCards(reports) {
+                const container = document.getElementById('citizen-reco-list');
+                if (!container) return;
+
+                // Only show pending reports as recommendations
+                const pending = reports.filter(r => r.status === 'pending' || !r.status);
+                if (pending.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                // Section divider
+                let html = `<div style="margin-top:32px;margin-bottom:16px">
+                    <div class="sl">Live Citizen Reports</div>
+                    <p style="font-size:.82rem;color:var(--tm)">Real-time reports from citizens — opt in to take action.</p>
+                </div>`;
+
+                pending.forEach((r, i) => {
+                    const sev = r.severity || severityLabel(r.severityScore || 0);
+                    const score = r.severityScore || 0;
+                    const scorePercent = score * 10;
+                    const dashOffset = 132 - (132 * scorePercent / 100);
+                    const addr = r.locationAddress || 'Location not available';
+                    const desc = r.description || 'No description provided.';
+                    const type = r.wasteType || 'General';
+                    const time = formatTimestamp(r.createdAt);
+                    const cardId = 'cr-reco-' + r.id;
+                    const title = `${wasteTypeEmoji(type)} ${type} Waste — ${addr.split(',')[0]}`;
+                    const safeTitle = title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const color = getScoreColor(sev);
+                    const recommendation = r.aiRecommendation || '';
+
+                    html += `
+                    <div class="report-card" id="${cardId}" data-priority="${sev}" data-opted="false" data-report-id="${r.id}" style="animation:fadeUp .5s ease both;animation-delay:${i * 0.05}s">
+                        <div class="rc-header">
+                            <div class="rc-rank${sev === 'critical' ? ' top' : ''}">${String(i + 7).padStart(2, '0')}</div>
+                            ${getPriorityBadge(sev)}
+                            <div class="rc-title-wrap">
+                                <div class="rc-title">${title}</div>
+                                <div class="rc-loc">📍 ${addr}</div>
+                            </div>
+                            <div class="rc-score-ring">
+                                <svg width="52" height="52" viewBox="0 0 52 52">
+                                    <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(34,197,94,.12)" stroke-width="5"/>
+                                    <circle cx="26" cy="26" r="21" fill="none" stroke="${color}" stroke-width="5"
+                                        stroke-dasharray="132" stroke-dashoffset="${dashOffset}" stroke-linecap="round"/>
+                                </svg>
+                                <div class="score-num" style="color:${color}">${score * 10}</div>
+                            </div>
+                            <div class="rc-actions">
+                                <button class="btn ${getOptBtnClass(sev)} btn-sm"
+                                    onclick="optInCitizen('${cardId}','${safeTitle}','${r.id}')">Opt In →</button>
+                            </div>
+                        </div>
+                        <div class="rc-body">
+                            ${r.imageUrl ? '<div style="margin-bottom:12px;border-radius:10px;overflow:hidden;max-height:200px"><img src="' + r.imageUrl + '" style="width:100%;height:auto;display:block;object-fit:cover;max-height:200px" alt="Waste evidence" /></div>' : ''}
+                            <div class="rc-meta-row">
+                                <span class="meta-chip"><span class="mc-icon">${wasteTypeEmoji(type)}</span> ${type}</span>
+                                <span class="meta-chip"><span class="mc-icon">🕐</span> ${time}</span>
+                                <span class="meta-chip"><span class="mc-icon">${r.aiVerified ? '🤖' : '⚠️'}</span> ${r.aiVerified ? 'AI Verified' : 'Manual'}</span>
+                                ${r.lat ? '<span class="meta-chip"><span class="mc-icon">📌</span> ' + r.lat.toFixed(4) + ', ' + r.lng.toFixed(4) + '</span>' : ''}
+                            </div>
+                            <p class="rc-desc">${desc}</p>
+                            ${r.aiDescription ? '<p class="rc-desc" style="color:var(--ts);font-size:.78rem">🤖 <strong>AI Analysis:</strong> ' + r.aiDescription + '</p>' : ''}
+                            ${recommendation ? '<p class="rc-desc" style="color:var(--gb);font-size:.78rem">💡 <strong>AI Recommendation:</strong> ' + recommendation + '</p>' : ''}
+                        </div>
+                    </div>`;
+                });
+
+                container.innerHTML = html;
+            }
+
+            /* ══════════════════════════════════
+               OPT-IN FOR CITIZEN REPORTS
+               ══════════════════════════════════ */
+            function optInCitizen(cardId, title, reportId) {
+                // Remove any existing banner first
+                dismissBanner();
+
+                const confirmBanner = document.createElement('div');
+                confirmBanner.id = 'optin-banner';
+                confirmBanner.style.cssText = `
+                    position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+                    background:rgba(10,22,16,.97);border:1px solid var(--glass-bb);
+                    border-radius:16px;padding:20px 28px;z-index:600;
+                    text-align:center;max-width:420px;width:90%;
+                    box-shadow:0 20px 60px rgba(0,0,0,.5);animation:slideUp .25s ease;`;
+                const safeTitle = title.replace(/'/g, "\\'");
+                confirmBanner.innerHTML = `
+                    <div style="font-size:28px;margin-bottom:10px">🎯</div>
+                    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--tp);margin-bottom:6px">Opt In to This Mission?</div>
+                    <div style="font-size:.8rem;color:var(--tm);margin-bottom:18px;line-height:1.6">${title}<br>Your NGO will be responsible for resolving this issue.</div>
+                    <div style="display:flex;gap:10px;justify-content:center">
+                        <button onclick="confirmOptInCitizen('${cardId}','${safeTitle}','${reportId}')" class="btn btn-primary btn-sm">✅ Confirm Opt-In</button>
+                        <button onclick="dismissBanner()" class="btn btn-ghost btn-sm">Cancel</button>
+                    </div>`;
+                document.body.appendChild(confirmBanner);
+            }
+
+            /* ══════════════════════════════════
+               ACTIVE MISSIONS SYSTEM
+               ══════════════════════════════════ */
+            let activeMissions = [];
+
+            function confirmOptInCitizen(cardId, title, reportId) {
+                dismissBanner();
+                const card = document.getElementById(cardId);
+
+                // Update Firestore status
+                if (reportId) {
+                    fbDb.collection('waste_reports').doc(reportId).update({ status: 'opted-in' })
+                        .catch(err => console.error('Status update error:', err));
+                }
+
+                // Visually update the card
+                if (card) {
+                    card.classList.add('opted-in');
+                    card.dataset.opted = 'true';
+                    const actionWrap = card.querySelector('.rc-actions');
+                    if (actionWrap) actionWrap.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="openCompletion('${cardId}','${title.replace(/'/g,"\\'")}')">✅ Mark Complete</button>`;
+                    if (!card.querySelector('.status-bar')) {
+                        const sb = document.createElement('div');
+                        sb.className = 'status-bar';
+                        sb.innerHTML = `<span class="status-dot" style="background:var(--amber)"></span>
+                            <span class="st-label">Mission Accepted</span>
+                            <span class="st-sub">· Just now · Assign volunteers</span>
+                            <button class="btn btn-primary btn-sm ml-auto" onclick="showSection('volunteers')">Assign Volunteers →</button>`;
+                        card.appendChild(sb);
+                    }
+                }
+
+                // Add to active missions
+                const priority = card ? card.dataset.priority : 'medium';
+                activeMissions.push({
+                    id: cardId,
+                    reportId: reportId,
+                    title: title,
+                    priority: priority,
+                    optedAt: new Date(),
+                    status: 'in-progress'
+                });
+                renderActiveMissions();
+
+                toast(`🎯 Opted in: "${title.substring(0, 40)}…"`, 'success');
+                toast('🙋 Head to Volunteers to assign your team!', 'info');
+            }
+
+            function renderActiveMissions() {
+                const grid = document.getElementById('missions-grid');
+                if (!grid) return;
+
+                // Update sidebar badge
+                const badge = document.querySelector('.sb-item[onclick*="missions"] .sb-badge');
+                if (badge) badge.textContent = activeMissions.length;
+
+                let html = '';
+
+                activeMissions.forEach(m => {
+                    const safeTitle = m.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const timeSince = formatTimestamp({ toDate: () => m.optedAt });
+
+                    if (m.status === 'resolved') {
+                        html += `
+                        <div class="glass mission-card" style="border-color:rgba(74,222,128,.3);opacity:.85">
+                            <span class="mc-badge mcb-done">✅ Verified Complete</span>
+                            <h4>${m.title}</h4>
+                            <div class="mc-meta">📍 Resolved · ${timeSince}</div>
+                            <div class="progress-steps">
+                                <div class="ps-step done"><div class="ps-circle">✓</div></div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step done"><div class="ps-circle">✓</div></div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step done"><div class="ps-circle">✓</div></div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step done"><div class="ps-circle">✓</div></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--tm);margin-bottom:14px">
+                                <span>Opted In</span><span>Team Assigned</span><span>Cleanup</span><span>Verified</span>
+                            </div>
+                            <p style="font-size:.76rem;color:var(--gc);font-weight:600">✓ Evidence verified · +350 XP earned · Report closed</p>
+                        </div>`;
+                    } else {
+                        html += `
+                        <div class="glass mission-card">
+                            <span class="mc-badge mcb-active">🔵 In Progress</span>
+                            <h4>${m.title}</h4>
+                            <div class="mc-meta">📍 Opted in ${timeSince}</div>
+                            <div class="progress-steps">
+                                <div class="ps-step done"><div class="ps-circle">✓</div></div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step active"><div class="ps-circle">2</div></div>
+                                <div class="ps-line"></div>
+                                <div class="ps-step"><div class="ps-circle">3</div></div>
+                                <div class="ps-line"></div>
+                                <div class="ps-step"><div class="ps-circle">4</div></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--tm);margin-bottom:14px">
+                                <span>Opted In</span><span>Team Assigned</span><span>Cleanup</span><span>Verified</span>
+                            </div>
+                            <p style="font-size:.8rem;color:var(--tm);margin-bottom:16px;line-height:1.6">
+                                Mission accepted. Assign volunteers and upload before/after photos to close this mission.
+                            </p>
+                            <button class="btn btn-primary btn-full" onclick="openCompletion('${m.id}','${safeTitle}')">
+                                📸 Upload Before/After Photos
+                            </button>
+                        </div>`;
+                    }
+                });
+
+                // Add the "opt into more" card
+                html += `
+                <div class="glass mission-card" style="border-style:dashed;border-color:var(--glass-b);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px">
+                    <div style="font-size:40px;opacity:.25;margin-bottom:12px">🎯</div>
+                    <p style="font-size:.85rem;color:var(--tm);text-align:center;margin-bottom:16px">
+                        Opt into more reports<br>to create new missions
+                    </p>
+                    <button class="btn btn-ghost btn-sm" onclick="showSection('reports')">Browse Reports →</button>
+                </div>`;
+
+                grid.innerHTML = html;
+            }
+            /* ── NOTIFICATION FILTER ── */
+            function filterNotifs(el, type) {
+                el.closest('div').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                el.classList.add('active');
+                document.querySelectorAll('.notif-item').forEach(n => {
+                    n.style.display = (type === 'all' || n.dataset.type === type) ? '' : 'none';
+                });
+            }
         </script>
 </body>
 
