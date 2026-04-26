@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, Camera, AlertTriangle, Send, Trash2, Factory, FlaskConical, Recycle, Waves, TreePine, Bot, ShieldCheck, ShieldX, Loader2, Sparkles, RefreshCw } from 'lucide-react'
-import { analyzeWasteImage } from '../services/geminiService'
+import { analyzeWasteImage } from '../services/groqService'
 import { saveReport } from '../services/reportStore'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -38,7 +38,7 @@ function getSeverityColor(score) {
 }
 
 export default function ReportSection({ onToast }) {
-  const { loginWithGoogle } = useAuth()
+  const { loginWithGoogle, user } = useAuth()
   const [selectedType, setSelectedType] = useState('General')
   const [severity, setSeverity] = useState('')
   const [description, setDescription] = useState('')
@@ -55,7 +55,7 @@ export default function ReportSection({ onToast }) {
   const runAnalysis = async (base64) => {
     setAiAnalysis(null)
     setIsAnalyzing(true)
-    onToast?.('🤖 Analyzing image with Gemini AI…', 'info')
+    onToast?.('🤖 Analyzing image with AI…', 'info')
     try {
       const result = await analyzeWasteImage(base64)
       setAiAnalysis(result)
@@ -176,8 +176,8 @@ export default function ReportSection({ onToast }) {
         <div
           onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
           onDragLeave={() => setIsDragOver(false)}
-          onDrop={(e) => { e.preventDefault(); setIsDragOver(false); loginWithGoogle() }}
-          onClick={loginWithGoogle}
+          onDrop={(e) => { e.preventDefault(); setIsDragOver(false); user ? handleFile(e.dataTransfer.files[0]) : loginWithGoogle() }}
+          onClick={() => user ? fileRef.current?.click() : loginWithGoogle()}
           className={`relative cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-300 p-14 text-center group ${
             isDragOver
               ? 'border-eco-400 bg-eco-400/[0.05] scale-[1.01]'
@@ -219,7 +219,7 @@ export default function ReportSection({ onToast }) {
               {isAnalyzing && (
                 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
                   <Loader2 className="w-8 h-8 text-eco-400 animate-spin" />
-                  <span className="text-sm font-medium text-eco-300">Gemini AI Analyzing…</span>
+                  <span className="text-sm font-medium text-eco-300">AI Analyzing…</span>
                 </div>
               )}
             </div>
@@ -240,7 +240,7 @@ export default function ReportSection({ onToast }) {
             {wasteTypes.map(({ label, emoji }) => (
               <button
                 key={label}
-                onClick={loginWithGoogle}
+                onClick={() => user ? setSelectedType(label) : loginWithGoogle()}
                 className={`px-4 py-2 rounded-full text-xs font-medium border transition-all duration-200 ${
                   selectedType === label
                     ? 'border-eco-400 text-eco-300 bg-eco-400/[0.08]'
@@ -279,7 +279,7 @@ export default function ReportSection({ onToast }) {
 
           {/* Submit */}
           <button
-            onClick={loginWithGoogle}
+            onClick={() => user ? handleSubmit() : loginWithGoogle()}
             className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl bg-gradient-to-r from-eco-600 to-eco-400 text-white font-semibold hover:shadow-[0_0_25px_rgba(34,197,94,0.25)] hover:-translate-y-0.5 transition-all duration-300"
             id="btn-submit-report"
           >
@@ -325,11 +325,11 @@ export default function ReportSection({ onToast }) {
                 <div>
                   <h3 className="font-display font-bold text-base text-eco-100 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-eco-400" />
-                    Gemini AI Analysis
+                    AI Analysis — Llama 4 Scout
                   </h3>
                   <p className="text-xs text-eco-200/40">
                     {isAnalyzing
-                      ? 'Processing image with Gemini 2.0 Flash…'
+                      ? 'Processing image with Llama 4 Scout…'
                       : aiAnalysis?.isGarbage
                         ? `Waste verified · ${Math.round((aiAnalysis.confidence || 0) * 100)}% confidence`
                         : 'No waste detected in image'}
@@ -467,7 +467,7 @@ export default function ReportSection({ onToast }) {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        loginWithGoogle()
+                        user ? runAnalysis(imageBase64) : loginWithGoogle()
                       }}
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-300 hover:bg-amber-500/20 transition-all"
                     >

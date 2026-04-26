@@ -3,7 +3,7 @@ import { ExternalLink, Copy, Leaf } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function ShareSection({ onToast }) {
-  const { loginWithGoogle } = useAuth()
+  const { loginWithGoogle, user } = useAuth()
   const shareMsg = encodeURIComponent(
     "I reported a waste issue on EcoSense! Join me in keeping our city clean 🌿 #EcoSense #CleanCity"
   )
@@ -98,14 +98,14 @@ export default function ShareSection({ onToast }) {
           ].map(({ label, platform, icon, color }) => (
             <button
               key={platform}
-              onClick={loginWithGoogle}
+              onClick={() => user ? shareSocial(platform) : loginWithGoogle()}
               className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium border transition-all duration-300 hover:-translate-y-1 ${color}`}
             >
               {icon} {label}
             </button>
           ))}
           <button
-            onClick={loginWithGoogle}
+            onClick={() => user ? copyLink() : loginWithGoogle()}
             className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium glass text-eco-200/50 hover:text-eco-300 hover:border-eco-400 hover:-translate-y-1 transition-all duration-300"
           >
             <Copy className="w-3.5 h-3.5" /> Copy Link
