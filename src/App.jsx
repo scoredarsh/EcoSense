@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import ReportSection from './components/ReportSection'
@@ -8,11 +8,20 @@ import ShareSection from './components/ShareSection'
 import Footer from './components/Footer'
 import { useToast, ToastContainer } from './components/Toast'
 import Dashboard from './components/Dashboard'
+import NGOLogin from './components/NGOLogin'
+import NGODashboard from './components/NGODashboard'
 import { useAuth } from './contexts/AuthContext'
 
 export default function App() {
   const { toasts, showToast } = useToast()
   const { user } = useAuth()
+  const [currentHash, setCurrentHash] = useState(window.location.hash)
+
+  useEffect(() => {
+    const onHashChange = () => setCurrentHash(window.location.hash)
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -21,6 +30,13 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [showToast])
 
+  // Check if this is an NGO user by email pattern
+  const isNGOUser = user?.email && /(ngo|@ngo\.in|@ngo\.com)$/i.test(user.email)
+
+  if (user && isNGOUser) {
+    return <NGODashboard />
+  }
+
   if (user) {
     return (
       <>
@@ -28,6 +44,10 @@ export default function App() {
         <ToastContainer toasts={toasts} />
       </>
     )
+  }
+
+  if (currentHash === '#ngo-login') {
+    return <NGOLogin />
   }
 
   return (

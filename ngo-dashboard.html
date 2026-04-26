@@ -1,0 +1,3114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoSense — NGO Command Centre</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* ═══════════════════════════════════════════════
+   DESIGN TOKENS — exact match to EcoSense brand
+   ═══════════════════════════════════════════════ */
+        :root {
+            --bg-deep: #060d0a;
+            --bg-mid: #0a1610;
+            --glass: rgba(16, 42, 26, 0.55);
+            --glass-b: rgba(52, 211, 105, 0.15);
+            --glass-bb: rgba(52, 211, 105, 0.35);
+            --gc: #22c55e;
+            --gb: #4ade80;
+            --gd: #16a34a;
+            --gg: rgba(34, 197, 94, 0.25);
+            --gu: rgba(34, 197, 94, 0.08);
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --blue: #60a5fa;
+            --tp: #e2fae9;
+            --ts: #86efac;
+            --tm: #4b7a5e;
+            --r: 18px;
+            --rs: 10px;
+            --blur: blur(20px);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-deep);
+            color: var(--tp);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 15% 20%, rgba(34, 197, 94, .08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 60% at 85% 80%, rgba(16, 150, 60, .07) 0%, transparent 60%),
+                radial-gradient(ellipse 30% 30% at 50% 50%, rgba(34, 197, 94, .04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gd);
+            border-radius: 3px
+        }
+
+        /* ── GLASS UTIL ── */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-b);
+            border-radius: var(--r);
+        }
+
+        /* ═══════════════════════════════════
+   NAV
+   ═══════════════════════════════════ */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 36px;
+            background: rgba(6, 13, 10, .92);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--glass-b);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--gb);
+            letter-spacing: -.5px;
+            text-decoration: none;
+        }
+
+        .nav-logo .leaf {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--gc), var(--gb));
+            border-radius: 50% 10px 50% 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 0 14px var(--gg);
+        }
+
+        .nav-center {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(10, 22, 16, .8);
+            border: 1px solid var(--glass-b);
+            border-radius: 30px;
+            padding: 4px;
+        }
+
+        .nav-tab {
+            padding: 6px 18px;
+            border-radius: 24px;
+            font-size: .8rem;
+            font-weight: 500;
+            color: var(--ts);
+            cursor: pointer;
+            transition: all .2s;
+            border: none;
+            background: transparent;
+        }
+
+        .nav-tab.active {
+            background: rgba(34, 197, 94, .15);
+            color: var(--gb);
+            border: 1px solid var(--glass-bb);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .ngo-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, .12), rgba(74, 222, 128, .08));
+            border: 1px solid var(--glass-bb);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--gb);
+        }
+
+        .ngo-badge .org-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--gc);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: .5;
+                transform: scale(1.4)
+            }
+        }
+
+        /* ═══════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════ */
+        .shell {
+            padding-top: 64px;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            width: 250px;
+            background: rgba(6, 13, 10, .94);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-b);
+            padding: 24px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sb-label {
+            font-size: .63rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--tm);
+            padding: 14px 12px 6px;
+        }
+
+        .sb-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 11px;
+            color: var(--ts);
+            text-decoration: none;
+            font-size: .84rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .18s;
+            border: 1px solid transparent;
+        }
+
+        .sb-item:hover {
+            background: var(--gu);
+            color: var(--gb);
+            border-color: var(--glass-b)
+        }
+
+        .sb-item.active {
+            background: rgba(34, 197, 94, .1);
+            color: var(--gb);
+            border-color: var(--glass-bb);
+        }
+
+        .sb-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .sb-item.active .sb-icon {
+            background: rgba(34, 197, 94, .18)
+        }
+
+        .sb-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: .62rem;
+            font-weight: 800;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .sb-badge.red {
+            background: var(--red);
+            color: #fff
+        }
+
+        .sb-badge.green {
+            background: linear-gradient(135deg, var(--gd), var(--gc));
+            color: #fff
+        }
+
+        .sb-badge.amber {
+            background: var(--amber);
+            color: #000
+        }
+
+        .sb-div {
+            height: 1px;
+            background: var(--glass-b);
+            margin: 10px 2px
+        }
+
+        .org-card {
+            margin-top: auto;
+            padding: 14px 12px;
+            background: var(--glass);
+            border: 1px solid var(--glass-b);
+            border-radius: 14px;
+        }
+
+        .org-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--gd), var(--gb));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 0 12px var(--gg);
+        }
+
+        .org-info .org-name {
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--tp)
+        }
+
+        .org-info .org-role {
+            font-size: .68rem;
+            color: var(--gc)
+        }
+
+        /* ── MAIN ── */
+        .main {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 40px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            box-sizing: border-box;
+            min-width: 0;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-hdr {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px
+        }
+
+        .page-hdr h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .page-hdr h1 span {
+            background: linear-gradient(90deg, var(--gc), var(--gb));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-hdr .sub {
+            font-size: .82rem;
+            color: var(--tm);
+            margin-top: 4px
+        }
+
+        .hdr-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        /* ── STATS STRIP ── */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 28px;
+            /* Increased gap from 18px */
+            min-width: 0;
+        }
+
+        .stats-strip>* {
+            min-width: 0
+        }
+
+        .sc {
+            padding: 26px 28px;
+            position: relative;
+            overflow: hidden;
+            transition: transform .22s, box-shadow .22s;
+        }
+
+        .sc:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, .4)
+        }
+
+        .sc::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(34, 197, 94, .12) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .sc.amber::before {
+            background: radial-gradient(circle, rgba(245, 158, 11, .12) 0%, transparent 70%)
+        }
+
+        .sc.red::before {
+            background: radial-gradient(circle, rgba(239, 68, 68, .12) 0%, transparent 70%)
+        }
+
+        .sc.blue::before {
+            background: radial-gradient(circle, rgba(96, 165, 250, .12) 0%, transparent 70%)
+        }
+
+        .sc-lbl {
+            font-size: .68rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--tm)
+        }
+
+        .sc-val {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--gb);
+            line-height: 1;
+            margin: 4px 0
+        }
+
+        .sc.amber .sc-val {
+            color: var(--amber)
+        }
+
+        .sc.red .sc-val {
+            color: var(--red)
+        }
+
+        .sc.blue .sc-val {
+            color: var(--blue)
+        }
+
+        .sc-sub {
+            font-size: .72rem;
+            color: var(--tm)
+        }
+
+        .sc-ico {
+            position: absolute;
+            bottom: 14px;
+            right: 16px;
+            font-size: 26px;
+            opacity: .18
+        }
+
+        /* ── SECTION LABEL ── */
+        .sl {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--gc);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .sl::before {
+            content: '';
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: var(--gc);
+            border-radius: 2px
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .22s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gd), var(--gc));
+            color: #fff;
+            box-shadow: 0 0 22px var(--gg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 38px var(--gg)
+        }
+
+        .btn-ghost {
+            background: var(--glass);
+            border: 1px solid var(--glass-bb);
+            color: var(--ts);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--gc);
+            color: var(--gb);
+            transform: translateY(-1px)
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #7f1d1d, var(--red));
+            color: #fff;
+            box-shadow: 0 0 18px rgba(239, 68, 68, .2);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 32px rgba(239, 68, 68, .35)
+        }
+
+        .btn-amber {
+            background: linear-gradient(135deg, #92400e, var(--amber));
+            color: #000;
+        }
+
+        .btn-amber:hover {
+            transform: translateY(-2px)
+        }
+
+        .btn-sm {
+            padding: 7px 16px;
+            font-size: .78rem
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center
+        }
+
+        /* ── FORM ELEMENTS ── */
+        .fg {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 14px
+        }
+
+        .fg label {
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--tm);
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        .fc {
+            background: rgba(34, 197, 94, .05);
+            border: 1px solid var(--glass-b);
+            border-radius: var(--rs);
+            padding: 9px 13px;
+            color: var(--tp);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .85rem;
+            transition: border-color .2s;
+            outline: none;
+            width: 100%;
+        }
+
+        .fc:focus {
+            border-color: var(--gc);
+            background: rgba(34, 197, 94, .08)
+        }
+
+        .fc::placeholder {
+            color: var(--tm)
+        }
+
+        textarea.fc {
+            resize: vertical;
+            min-height: 80px
+        }
+
+        select.fc {
+            cursor: pointer
+        }
+
+        select.fc option {
+            background: #0a1610;
+            color: var(--tp)
+        }
+
+        /* ═══════════════════════════════════════════════
+   SECTION 1 — RECOMMENDED REPORTS
+   ═══════════════════════════════════════════════ */
+        .reco-section {
+            display: flex;
+            flex-direction: column;
+            gap: 32px
+        }
+
+        /* Increased from 22px */
+
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: .76rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--glass-b);
+            background: var(--glass);
+            color: var(--ts);
+            transition: all .18s;
+        }
+
+        .filter-pill:hover,
+        .filter-pill.active {
+            background: rgba(34, 197, 94, .12);
+            border-color: var(--glass-bb);
+            color: var(--gb);
+        }
+
+        .filter-pill.red-pill.active {
+            background: rgba(239, 68, 68, .12);
+            border-color: rgba(239, 68, 68, .4);
+            color: var(--red)
+        }
+
+        .filter-pill.amber-pill.active {
+            background: rgba(245, 158, 11, .12);
+            border-color: rgba(245, 158, 11, .4);
+            color: var(--amber)
+        }
+
+        .search-box {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(34, 197, 94, .05);
+            border: 1px solid var(--glass-b);
+            border-radius: 30px;
+            padding: 7px 14px;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--tp);
+            font-size: .82rem;
+            width: 180px;
+        }
+
+        .search-box input::placeholder {
+            color: var(--tm)
+        }
+
+        /* Report card */
+        .report-list {
+            display: flex;
+            flex-direction: column;
+            gap: 32px
+        }
+
+        /* Increased from 20px */
+        .report-card {
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid var(--glass-b);
+            border-radius: var(--r);
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            transition: border-color .22s, transform .22s;
+        }
+
+        .report-card:hover {
+            border-color: var(--glass-bb);
+            transform: translateY(-2px)
+        }
+
+        .report-card.opted-in {
+            border-color: var(--gc);
+            box-shadow: 0 0 20px rgba(34, 197, 94, .1)
+        }
+
+        .report-card.resolved {
+            border-color: rgba(74, 222, 128, .5);
+            opacity: .8
+        }
+
+        .rc-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 22px 28px;
+            border-bottom: 1px solid rgba(34, 197, 94, .08);
+        }
+
+        .rc-rank {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--tm);
+            width: 36px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .rc-rank.top {
+            color: var(--red)
+        }
+
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: .7rem;
+            font-weight: 800;
+            letter-spacing: .5px;
+            flex-shrink: 0;
+        }
+
+        .pb-critical {
+            background: rgba(239, 68, 68, .15);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, .3)
+        }
+
+        .pb-high {
+            background: rgba(245, 158, 11, .15);
+            color: var(--amber);
+            border: 1px solid rgba(245, 158, 11, .3)
+        }
+
+        .pb-medium {
+            background: rgba(96, 165, 250, .15);
+            color: var(--blue);
+            border: 1px solid rgba(96, 165, 250, .3)
+        }
+
+        .pb-low {
+            background: rgba(34, 197, 94, .12);
+            color: var(--gb);
+            border: 1px solid var(--glass-bb)
+        }
+
+        .rc-title-wrap {
+            flex: 1;
+            min-width: 0
+        }
+
+        .rc-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--tp);
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .rc-loc {
+            font-size: .76rem;
+            color: var(--tm)
+        }
+
+        .rc-score-ring {
+            flex-shrink: 0;
+            width: 52px;
+            height: 52px;
+            position: relative;
+        }
+
+        .rc-score-ring svg {
+            transform: rotate(-90deg)
+        }
+
+        .rc-score-ring .score-num {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-size: .8rem;
+            font-weight: 800;
+            color: var(--gb);
+        }
+
+        .rc-actions {
+            flex-shrink: 0;
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .rc-body {
+            padding: 22px 28px
+        }
+
+        .rc-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .meta-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(34, 197, 94, .06);
+            border: 1px solid var(--glass-b);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: .74rem;
+            color: var(--ts);
+        }
+
+        .meta-chip .mc-icon {
+            font-size: 12px
+        }
+
+        .rc-desc {
+            font-size: .84rem;
+            color: var(--tm);
+            line-height: 1.75;
+            margin-bottom: 20px;
+        }
+
+        .rc-reports-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .rb-label {
+            font-size: .7rem;
+            color: var(--tm);
+            white-space: nowrap
+        }
+
+        .rb-track {
+            flex: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 5px;
+            overflow: hidden
+        }
+
+        .rb-fill {
+            height: 100%;
+            border-radius: 5px;
+            background: linear-gradient(90deg, var(--gd), var(--gb))
+        }
+
+        .rb-fill.red-fill {
+            background: linear-gradient(90deg, #991b1b, var(--red))
+        }
+
+        .rb-fill.amber-fill {
+            background: linear-gradient(90deg, #92400e, var(--amber))
+        }
+
+        .rb-count {
+            font-family: 'Syne', sans-serif;
+            font-size: .78rem;
+            font-weight: 800;
+            color: var(--gb);
+            white-space: nowrap
+        }
+
+        /* Volunteer assign row */
+        .vol-assign-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 12px 14px;
+            background: rgba(34, 197, 94, .04);
+            border-radius: var(--rs);
+            border: 1px solid var(--glass-b);
+            margin-top: 8px;
+        }
+
+        .vol-assign-row .vl {
+            font-size: .73rem;
+            color: var(--tm)
+        }
+
+        .vol-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            flex: 1
+        }
+
+        .vol-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(34, 197, 94, .1);
+            border: 1px solid var(--glass-bb);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: .72rem;
+            color: var(--gb);
+        }
+
+        .vol-chip .vc-avatar {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gd), var(--gb));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        /* Status bar on opted-in cards */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 22px;
+            background: rgba(34, 197, 94, .06);
+            border-top: 1px solid rgba(34, 197, 94, .1);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            animation: pulse 2s infinite
+        }
+
+        .status-bar .st-label {
+            font-size: .76rem;
+            font-weight: 600;
+            color: var(--gb)
+        }
+
+        .status-bar .st-sub {
+            font-size: .7rem;
+            color: var(--tm)
+        }
+
+        .status-bar .ml-auto {
+            margin-left: auto
+        }
+
+        /* ═══════════════════════════════════════════════
+   SECTION 2 — TASK COMPLETION / BEFORE-AFTER
+   ═══════════════════════════════════════════════ */
+        .completion-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px
+        }
+
+        /* Increased from 16px */
+        .active-missions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px;
+            min-width: 0;
+            /* Increased gap from 16px */
+        }
+
+        .active-missions-grid>* {
+            min-width: 0
+        }
+
+        .mission-card {
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            /* Increased padding from 22px */
+            border: 1px solid rgba(34, 197, 94, .2);
+            border-radius: var(--r);
+            background: rgba(16, 42, 26, .45);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+        }
+
+        .mc-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: .68rem;
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
+
+        .mcb-active {
+            background: rgba(96, 165, 250, .15);
+            color: var(--blue);
+            border: 1px solid rgba(96, 165, 250, .3)
+        }
+
+        .mcb-pending {
+            background: rgba(245, 158, 11, .15);
+            color: var(--amber);
+            border: 1px solid rgba(245, 158, 11, .3)
+        }
+
+        .mcb-done {
+            background: rgba(34, 197, 94, .15);
+            color: var(--gb);
+            border: 1px solid var(--glass-bb)
+        }
+
+        .mission-card h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--tp);
+            margin-bottom: 6px;
+        }
+
+        .mission-card .mc-meta {
+            font-size: .75rem;
+            color: var(--tm);
+            margin-bottom: 14px
+        }
+
+        .progress-steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 16px
+        }
+
+        .ps-step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .ps-step:last-child {
+            flex: none
+        }
+
+        .ps-circle {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: 'Syne', sans-serif;
+            border: 2px solid var(--glass-b);
+            color: var(--tm);
+            transition: all .25s;
+        }
+
+        .ps-step.done .ps-circle {
+            background: linear-gradient(135deg, var(--gd), var(--gc));
+            border-color: var(--gc);
+            color: #fff;
+        }
+
+        .ps-step.active .ps-circle {
+            border-color: var(--gb);
+            color: var(--gb);
+            box-shadow: 0 0 12px var(--gg);
+        }
+
+        .ps-label {
+            font-size: .65rem;
+            color: var(--tm);
+            display: none
+        }
+
+        .ps-line {
+            flex: 1;
+            height: 2px;
+            background: var(--glass-b);
+            margin: 0 4px
+        }
+
+        .ps-step.done+.ps-line,
+        .ps-step.done .ps-line {
+            background: var(--gc)
+        }
+
+        /* ── BEFORE/AFTER UPLOAD UI ── */
+        .ba-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 14px 0
+        }
+
+        .ba-zone {
+            border: 2px dashed var(--glass-bb);
+            border-radius: var(--rs);
+            padding: 20px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .22s;
+            position: relative;
+            background: rgba(34, 197, 94, .03);
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .ba-zone:hover,
+        .ba-zone.drag {
+            border-color: var(--gc);
+            background: rgba(34, 197, 94, .07)
+        }
+
+        .ba-zone input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%
+        }
+
+        .ba-zone .bz-icon {
+            font-size: 28px
+        }
+
+        .ba-zone .bz-title {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--tp)
+        }
+
+        .ba-zone .bz-sub {
+            font-size: .68rem;
+            color: var(--tm)
+        }
+
+        .ba-zone.has-image {
+            border-style: solid;
+            border-color: var(--gc)
+        }
+
+        .ba-preview {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 100px;
+        }
+
+        .ba-preview img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .ba-preview .rm-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(239, 68, 68, .85);
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .ba-label {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: .65rem;
+            font-weight: 800;
+            letter-spacing: .5px;
+            z-index: 2;
+        }
+
+        .ba-before {
+            background: rgba(239, 68, 68, .85);
+            color: #fff
+        }
+
+        .ba-after {
+            background: rgba(34, 197, 94, .85);
+            color: #fff
+        }
+
+        .verify-btn-wrap {
+            margin-top: 4px
+        }
+
+        /* Full completion modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(6, 13, 10, .85);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn .2s ease;
+        }
+
+        .modal-overlay.open {
+            display: flex
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .modal-box {
+            background: rgba(10, 22, 16, .95);
+            border: 1px solid var(--glass-bb);
+            border-radius: 22px;
+            padding: 36px;
+            max-width: 580px;
+            width: 90%;
+            animation: slideUp .3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .modal-box h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--tp);
+        }
+
+        .modal-box .modal-sub {
+            font-size: .82rem;
+            color: var(--tm);
+            margin-bottom: 24px
+        }
+
+        .modal-ba-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px
+        }
+
+        .modal-zone {
+            border: 2px dashed var(--glass-bb);
+            border-radius: var(--rs);
+            padding: 28px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .22s;
+            position: relative;
+            background: rgba(34, 197, 94, .03);
+        }
+
+        .modal-zone:hover {
+            border-color: var(--gc);
+            background: rgba(34, 197, 94, .07)
+        }
+
+        .modal-zone.has-img {
+            border-style: solid;
+            border-color: var(--gc)
+        }
+
+        .modal-zone input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%
+        }
+
+        .modal-zone .mz-ico {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 8px
+        }
+
+        .modal-zone .mz-label {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--tp);
+            margin-bottom: 4px
+        }
+
+        .modal-zone .mz-sub {
+            font-size: .72rem;
+            color: var(--tm)
+        }
+
+        .modal-zone .mz-badge {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .68rem;
+            font-weight: 800;
+        }
+
+        .mz-before-b {
+            background: rgba(239, 68, 68, .2);
+            color: var(--red)
+        }
+
+        .mz-after-b {
+            background: rgba(34, 197, 94, .2);
+            color: var(--gb)
+        }
+
+        .modal-zone .preview-img-wrap {
+            position: relative
+        }
+
+        .modal-zone .preview-img-wrap img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .modal-zone .rm {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, .7);
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-notes {
+            margin-bottom: 20px
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end
+        }
+
+        /* ═══════════════════════════════════════════════
+   SECTION 3 — VOLUNTEER MANAGEMENT
+   ═══════════════════════════════════════════════ */
+        .vol-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px
+        }
+
+        /* Increased from 16px */
+        .vol-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px
+        }
+
+        .vol-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 32px;
+            min-width: 0
+        }
+
+        /* Increased gap from 20px */
+        .vol-grid>* {
+            min-width: 0
+        }
+
+        /* Volunteer table */
+        .vol-table-wrap {
+            overflow-x: auto
+        }
+
+        .vol-table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        .vol-table th {
+            text-align: left;
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--tm);
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--glass-b);
+            white-space: nowrap;
+        }
+
+        .vol-table td {
+            padding: 13px 14px;
+            border-bottom: 1px solid rgba(34, 197, 94, .06);
+            font-size: .82rem;
+            vertical-align: middle;
+        }
+
+        .vol-table tr:last-child td {
+            border-bottom: none
+        }
+
+        .vol-table tr:hover td {
+            background: rgba(34, 197, 94, .04)
+        }
+
+        .vol-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .v-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--gd), var(--gb));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 0 8px var(--gg);
+        }
+
+        .v-name {
+            font-weight: 600;
+            color: var(--tp);
+            font-size: .82rem
+        }
+
+        .v-area {
+            font-size: .7rem;
+            color: var(--tm)
+        }
+
+        .skill-tag {
+            display: inline-flex;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: .68rem;
+            font-weight: 600;
+            background: rgba(34, 197, 94, .1);
+            border: 1px solid var(--glass-b);
+            color: var(--gb);
+            margin: 2px;
+        }
+
+        .avail-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .avail-dot.green {
+            background: var(--gc)
+        }
+
+        .avail-dot.amber {
+            background: var(--amber)
+        }
+
+        .avail-dot.red {
+            background: var(--red)
+        }
+
+        .assign-select {
+            background: rgba(34, 197, 94, .06);
+            border: 1px solid var(--glass-b);
+            border-radius: 8px;
+            padding: 5px 10px;
+            color: var(--tp);
+            font-size: .76rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .assign-select:focus {
+            border-color: var(--gc)
+        }
+
+        .assign-select option {
+            background: #0a1610
+        }
+
+        .vol-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: .7rem;
+            font-weight: 700;
+        }
+
+        .vsp-available {
+            background: rgba(34, 197, 94, .12);
+            color: var(--gb)
+        }
+
+        .vsp-assigned {
+            background: rgba(96, 165, 250, .12);
+            color: var(--blue)
+        }
+
+        .vsp-busy {
+            background: rgba(245, 158, 11, .12);
+            color: var(--amber)
+        }
+
+        /* Vol sidebar */
+        .vol-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px
+        }
+
+        /* Increased from 14px */
+        .vol-stat-card {
+            padding: 24px
+        }
+
+        /* Increased padding from 20px */
+        .vs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px
+        }
+
+        .vs-header h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: .95rem;
+            font-weight: 800;
+            color: var(--tp)
+        }
+
+        .vol-stat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 0;
+            border-bottom: 1px solid rgba(34, 197, 94, .07);
+        }
+
+        .vol-stat-row:last-child {
+            border-bottom: none
+        }
+
+        .vsr-bar-wrap {
+            flex: 1
+        }
+
+        .vsr-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: .7rem;
+            color: var(--tm);
+            margin-bottom: 4px
+        }
+
+        .vsr-track {
+            height: 4px;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 4px;
+            overflow: hidden
+        }
+
+        .vsr-fill {
+            height: 100%;
+            border-radius: 4px
+        }
+
+        .skill-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 20px
+        }
+
+        /* Increased gaps and padding */
+        .sk-tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: .74rem;
+            font-weight: 600;
+            background: rgba(34, 197, 94, .08);
+            border: 1px solid var(--glass-b);
+            color: var(--ts);
+            cursor: default;
+            transition: all .18s;
+        }
+
+        .sk-tag:hover {
+            background: rgba(34, 197, 94, .15);
+            color: var(--gb)
+        }
+
+        .invite-card {
+            padding: 24px
+        }
+
+        /* Increased padding */
+        .invite-card h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: .95rem;
+            font-weight: 800;
+            margin-bottom: 14px
+        }
+
+        /* ── TOAST ── */
+        #toast-root {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: rgba(10, 28, 18, .97);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--glass-b);
+            border-radius: 12px;
+            padding: 11px 16px;
+            min-width: 250px;
+            max-width: 320px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .8rem;
+            color: var(--tp);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, .4);
+            animation: toastIn .28s ease;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(24px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0)
+            }
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--tm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .empty-state .es-icon {
+            font-size: 44px;
+            opacity: .4
+        }
+
+        .empty-state p {
+            font-size: .85rem
+        }
+
+        /* ── ANIM ── */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .anim {
+            animation: fadeUp .5s ease both
+        }
+
+        .anim:nth-child(1) {
+            animation-delay: .04s
+        }
+
+        .anim:nth-child(2) {
+            animation-delay: .08s
+        }
+
+        .anim:nth-child(3) {
+            animation-delay: .12s
+        }
+
+        .anim:nth-child(4) {
+            animation-delay: .16s
+        }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:1100px) {
+            .stats-strip {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .active-missions-grid {
+                grid-template-columns: 1fr
+            }
+
+            .vol-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media(max-width:900px) {
+            .sidebar {
+                display: none
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px 16px
+            }
+
+            .stats-strip {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .modal-ba-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media(max-width:560px) {
+            .stats-strip {
+                grid-template-columns: 1fr
+            }
+
+            .ba-grid {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrap">
+
+        <nav>
+            <a class="nav-logo" href="#">
+                <div class="leaf">🌿</div>
+                EcoSense
+            </a>
+            <div class="nav-center">
+                <button class="nav-tab active" onclick="switchTab(this,'reports')">📋 Reports</button>
+                <button class="nav-tab" onclick="switchTab(this,'missions')">🎯 Missions</button>
+                <button class="nav-tab" onclick="switchTab(this,'volunteers')">🙋 Volunteers</button>
+            </div>
+            <div class="nav-right">
+                <div class="ngo-badge">
+                    <span class="org-dot"></span>
+                    GreenBridge NGO
+                </div>
+            </div>
+        </nav>
+
+        <div class="shell">
+
+            <aside class="sidebar">
+                <div class="sb-label">Operations</div>
+                <a class="sb-item active" onclick="showSection('reports')">
+                    <div class="sb-icon">📋</div> Report Recommendations
+                    <span class="sb-badge red">12</span>
+                </a>
+                <a class="sb-item" onclick="showSection('missions')">
+                    <div class="sb-icon">🎯</div> Active Missions
+                    <span class="sb-badge amber">4</span>
+                </a>
+                <a class="sb-item" onclick="showSection('completion')">
+                    <div class="sb-icon">✅</div> Task Completion
+                </a>
+
+                <div class="sb-label">Community</div>
+                <a class="sb-item" onclick="showSection('volunteers')">
+                    <div class="sb-icon">🙋</div> Volunteer Pool
+                    <span class="sb-badge green">23</span>
+                </a>
+                <a class="sb-item">
+                    <div class="sb-icon">📊</div> Impact Analytics
+                </a>
+                <a class="sb-item">
+                    <div class="sb-icon">📅</div> Drive Calendar
+                </a>
+
+                <div class="sb-label">Settings</div>
+                <a class="sb-item">
+                    <div class="sb-icon">⚙️</div> NGO Profile
+                </a>
+                <a class="sb-item">
+                    <div class="sb-icon">🔔</div> Notifications
+                    <span class="sb-badge red">3</span>
+                </a>
+
+                <div class="sb-div"></div>
+                <div class="org-card">
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <div class="org-avatar">♻️</div>
+                        <div class="org-info">
+                            <div class="org-name">GreenBridge NGO</div>
+                            <div class="org-role">🟢 Verified Partner</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="main">
+
+                <div class="page-hdr anim">
+                    <div>
+                        <h1>NGO <span>Command Centre</span></h1>
+                        <div class="sub">
+                            <span
+                                style="display:inline-block;width:7px;height:7px;background:var(--gc);border-radius:50%;animation:pulse 2s infinite;margin-right:6px;vertical-align:middle"></span>
+                            Live operations · Bengaluru, KA · Last sync 2 min ago
+                        </div>
+                    </div>
+                    <div class="hdr-actions">
+                        <button class="btn btn-ghost" onclick="toast('📡 Data refreshed!','success')">↻ Sync</button>
+                        <button class="btn btn-primary" onclick="showSection('reports')">📋 View Reports</button>
+                    </div>
+                </div>
+
+                <div class="stats-strip">
+                    <div class="glass sc anim">
+                        <div class="sc-lbl">Open Recommendations</div>
+                        <div class="sc-val">47</div>
+                        <div class="sc-sub">↑ 8 new today</div>
+                        <div class="sc-ico">📋</div>
+                    </div>
+                    <div class="glass sc amber anim">
+                        <div class="sc-lbl">Missions Opted-In</div>
+                        <div class="sc-val">4</div>
+                        <div class="sc-sub">2 awaiting completion</div>
+                        <div class="sc-ico">🎯</div>
+                    </div>
+                    <div class="glass sc anim">
+                        <div class="sc-lbl">Resolved This Month</div>
+                        <div class="sc-val">31</div>
+                        <div class="sc-sub">↑ 18% vs last month</div>
+                        <div class="sc-ico">✅</div>
+                    </div>
+                    <div class="glass sc blue anim">
+                        <div class="sc-lbl">Active Volunteers</div>
+                        <div class="sc-val">23</div>
+                        <div class="sc-sub">6 available now</div>
+                        <div class="sc-ico">🙋</div>
+                    </div>
+                </div>
+
+                <section id="sec-reports" class="reco-section">
+
+                    <div>
+                        <div class="sl">AI-Ranked Recommendations</div>
+                        <h2 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.5px">
+                            Garbage Dump Spots — Act Now
+                        </h2>
+                        <p style="font-size:.82rem;color:var(--tm);margin-top:4px">
+                            Ranked by priority score using number of civilian reports, severity, location density and
+                            time since first report.
+                        </p>
+                    </div>
+
+                    <div class="filter-bar">
+                        <button class="filter-pill active" onclick="setFilter(this,'all')">All Spots</button>
+                        <button class="filter-pill red-pill" onclick="setFilter(this,'critical')">🔴 Critical</button>
+                        <button class="filter-pill amber-pill" onclick="setFilter(this,'high')">🟡 High</button>
+                        <button class="filter-pill" onclick="setFilter(this,'medium')">🔵 Medium</button>
+                        <button class="filter-pill" onclick="setFilter(this,'opted')">✅ Opted In</button>
+                        <div class="search-box">
+                            <span style="color:var(--tm);font-size:14px">🔍</span>
+                            <input placeholder="Search location or type…" oninput="filterSearch(this.value)" />
+                        </div>
+                    </div>
+
+                    <div class="report-list" id="report-list">
+
+                        <div class="report-card" id="rc1" data-priority="critical" data-opted="false">
+                            <div class="rc-header">
+                                <div class="rc-rank top">01</div>
+                                <span class="priority-badge pb-critical">🔴 CRITICAL</span>
+                                <div class="rc-title-wrap">
+                                    <div class="rc-title">Overflowing Landfill — 5th Block Main Rd</div>
+                                    <div class="rc-loc">📍 Koramangala, Bengaluru · 400m from 5th Block Park</div>
+                                </div>
+                                <div class="rc-score-ring">
+                                    <svg width="52" height="52" viewBox="0 0 52 52">
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(34,197,94,.12)"
+                                            stroke-width="5" />
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="#22c55e" stroke-width="5"
+                                            stroke-dasharray="132" stroke-dashoffset="13" stroke-linecap="round" />
+                                    </svg>
+                                    <div class="score-num">90</div>
+                                </div>
+                                <div class="rc-actions">
+                                    <button class="btn btn-danger btn-sm"
+                                        onclick="optIn('rc1','Overflowing Landfill — 5th Block Main Rd')">Opt In
+                                        →</button>
+                                </div>
+                            </div>
+                            <div class="rc-body">
+                                <div class="rc-meta-row">
+                                    <span class="meta-chip"><span class="mc-icon">🗑️</span> Household + Construction
+                                        Mix</span>
+                                    <span class="meta-chip"><span class="mc-icon">📅</span> First reported 6 days
+                                        ago</span>
+                                    <span class="meta-chip"><span class="mc-icon">🕐</span> Last updated 45 min
+                                        ago</span>
+                                    <span class="meta-chip"><span class="mc-icon">📐</span> ~180 sq ft area</span>
+                                    <span class="meta-chip"><span class="mc-icon">⚠️</span> Foul odour reported</span>
+                                </div>
+                                <p class="rc-desc">
+                                    Large pile of household and construction debris accumulated over six days. Blocks a
+                                    portion of the footpath and is attracting rodents. Multiple residents and a
+                                    shopkeeper have independently confirmed the site. BBMP collection has failed twice
+                                    in the past week.
+                                </p>
+                                <div class="rc-reports-bar">
+                                    <span class="rb-label">Civilian Reports</span>
+                                    <div class="rb-track">
+                                        <div class="rb-fill red-fill" style="width:95%"></div>
+                                    </div>
+                                    <span class="rb-count">28 reports</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card" id="rc2" data-priority="critical" data-opted="false">
+                            <div class="rc-header">
+                                <div class="rc-rank top">02</div>
+                                <span class="priority-badge pb-critical">🔴 CRITICAL</span>
+                                <div class="rc-title-wrap">
+                                    <div class="rc-title">Hazardous Chemical Waste — Varthur Lake Road</div>
+                                    <div class="rc-loc">📍 Whitefield, Bengaluru · Near ITPL Back Gate</div>
+                                </div>
+                                <div class="rc-score-ring">
+                                    <svg width="52" height="52" viewBox="0 0 52 52">
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(34,197,94,.12)"
+                                            stroke-width="5" />
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="#ef4444" stroke-width="5"
+                                            stroke-dasharray="132" stroke-dashoffset="18" stroke-linecap="round" />
+                                    </svg>
+                                    <div class="score-num" style="color:var(--red)">87</div>
+                                </div>
+                                <div class="rc-actions">
+                                    <button class="btn btn-danger btn-sm"
+                                        onclick="optIn('rc2','Hazardous Chemical Waste — Varthur Lake Rd')">Opt In
+                                        →</button>
+                                </div>
+                            </div>
+                            <div class="rc-body">
+                                <div class="rc-meta-row">
+                                    <span class="meta-chip"><span class="mc-icon">🧪</span> Hazardous / Chemical</span>
+                                    <span class="meta-chip"><span class="mc-icon">📅</span> First reported 3 days
+                                        ago</span>
+                                    <span class="meta-chip"><span class="mc-icon">🕐</span> Last updated 2 hr ago</span>
+                                    <span class="meta-chip"><span class="mc-icon">💧</span> Near water body</span>
+                                    <span class="meta-chip"><span class="mc-icon">🚨</span> Hazmat handling req.</span>
+                                </div>
+                                <p class="rc-desc">
+                                    Unknown liquid waste drums found dumped adjacent to Varthur Lake road drain inlet.
+                                    Reports indicate strong chemical smell. Requires NGO with hazmat handling capacity
+                                    or coordination with KSPCB. Proximity to the lake makes this an urgent ecological
+                                    risk.
+                                </p>
+                                <div class="rc-reports-bar">
+                                    <span class="rb-label">Civilian Reports</span>
+                                    <div class="rb-track">
+                                        <div class="rb-fill red-fill" style="width:88%"></div>
+                                    </div>
+                                    <span class="rb-count">21 reports</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card" id="rc3" data-priority="high" data-opted="false">
+                            <div class="rc-header">
+                                <div class="rc-rank">03</div>
+                                <span class="priority-badge pb-high">🟡 HIGH</span>
+                                <div class="rc-title-wrap">
+                                    <div class="rc-title">Food Waste Buildup — Forum Mall Junction</div>
+                                    <div class="rc-loc">📍 Koramangala, Bengaluru · 100m from bus stop</div>
+                                </div>
+                                <div class="rc-score-ring">
+                                    <svg width="52" height="52" viewBox="0 0 52 52">
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(34,197,94,.12)"
+                                            stroke-width="5" />
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="#f59e0b" stroke-width="5"
+                                            stroke-dasharray="132" stroke-dashoffset="40" stroke-linecap="round" />
+                                    </svg>
+                                    <div class="score-num" style="color:var(--amber)">70</div>
+                                </div>
+                                <div class="rc-actions">
+                                    <button class="btn btn-amber btn-sm"
+                                        onclick="optIn('rc3','Food Waste Buildup — Forum Mall Junction')">Opt In
+                                        →</button>
+                                </div>
+                            </div>
+                            <div class="rc-body">
+                                <div class="rc-meta-row">
+                                    <span class="meta-chip"><span class="mc-icon">🍔</span> Food / Organic Waste</span>
+                                    <span class="meta-chip"><span class="mc-icon">📅</span> First reported 2 days
+                                        ago</span>
+                                    <span class="meta-chip"><span class="mc-icon">🕐</span> Last updated 3 hr ago</span>
+                                    <span class="meta-chip"><span class="mc-icon">🐀</span> Pest activity noted</span>
+                                </div>
+                                <p class="rc-desc">
+                                    Restaurant and street vendor waste accumulating near the Forum Mall signal. Bin
+                                    overflow leads to spillover on the footpath. Heavy pedestrian area — public health
+                                    concern. 14 independent reports over 48 hours.
+                                </p>
+                                <div class="rc-reports-bar">
+                                    <span class="rb-label">Civilian Reports</span>
+                                    <div class="rb-track">
+                                        <div class="rb-fill amber-fill" style="width:65%"></div>
+                                    </div>
+                                    <span class="rb-count">14 reports</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card opted-in" id="rc4" data-priority="high" data-opted="true">
+                            <div class="rc-header">
+                                <div class="rc-rank">04</div>
+                                <span class="priority-badge pb-high">🟡 HIGH</span>
+                                <div class="rc-title-wrap">
+                                    <div class="rc-title">Construction Debris — 80 Feet Road</div>
+                                    <div class="rc-loc">📍 Indiranagar, Bengaluru · Near CMH Road Junction</div>
+                                </div>
+                                <div class="rc-score-ring">
+                                    <svg width="52" height="52" viewBox="0 0 52 52">
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(34,197,94,.12)"
+                                            stroke-width="5" />
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="#f59e0b" stroke-width="5"
+                                            stroke-dasharray="132" stroke-dashoffset="53" stroke-linecap="round" />
+                                    </svg>
+                                    <div class="score-num" style="color:var(--amber)">60</div>
+                                </div>
+                                <div class="rc-actions">
+                                    <button class="btn btn-ghost btn-sm"
+                                        onclick="openCompletion('rc4','Construction Debris — 80 Feet Road')">
+                                        ✅ Mark Complete
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="rc-body">
+                                <div class="rc-meta-row">
+                                    <span class="meta-chip"><span class="mc-icon">🏗️</span> Construction Debris</span>
+                                    <span class="meta-chip"><span class="mc-icon">📅</span> Opted in 1 day ago</span>
+                                    <span class="meta-chip"><span class="mc-icon">🙋</span> 3 volunteers assigned</span>
+                                </div>
+                                <p class="rc-desc">
+                                    Construction waste from a nearby renovation dumped on the footpath. Concrete blocks
+                                    and iron rods partially obstruct road access. Your team has been assigned and
+                                    cleanup is underway.
+                                </p>
+                                <div class="rc-reports-bar">
+                                    <span class="rb-label">Civilian Reports</span>
+                                    <div class="rb-track">
+                                        <div class="rb-fill amber-fill" style="width:55%"></div>
+                                    </div>
+                                    <span class="rb-count">11 reports</span>
+                                </div>
+                                <div class="vol-assign-row">
+                                    <span class="vl">Assigned:</span>
+                                    <div class="vol-chips">
+                                        <span class="vol-chip">
+                                            <div class="vc-avatar">🌿</div> Priya M.
+                                        </span>
+                                        <span class="vol-chip">
+                                            <div class="vc-avatar">🌱</div> Arjun R.
+                                        </span>
+                                        <span class="vol-chip">
+                                            <div class="vc-avatar">♻️</div> Sneha P.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="status-bar">
+                                <span class="status-dot" style="background:var(--amber)"></span>
+                                <span class="st-label">Cleanup In Progress</span>
+                                <span class="st-sub">· Started 6 hr ago · ETA: today</span>
+                                <button class="btn btn-primary btn-sm ml-auto"
+                                    onclick="openCompletion('rc4','Construction Debris — 80 Feet Road')">
+                                    Upload Proof →
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="report-card" id="rc5" data-priority="medium" data-opted="false">
+                            <div class="rc-header">
+                                <div class="rc-rank">05</div>
+                                <span class="priority-badge pb-medium">🔵 MEDIUM</span>
+                                <div class="rc-title-wrap">
+                                    <div class="rc-title">Sewage Overflow — BTM 2nd Stage</div>
+                                    <div class="rc-loc">📍 BTM Layout, Bengaluru · Near Madiwala Market</div>
+                                </div>
+                                <div class="rc-score-ring">
+                                    <svg width="52" height="52" viewBox="0 0 52 52">
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(34,197,94,.12)"
+                                            stroke-width="5" />
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="#60a5fa" stroke-width="5"
+                                            stroke-dasharray="132" stroke-dashoffset="66" stroke-linecap="round" />
+                                    </svg>
+                                    <div class="score-num" style="color:var(--blue)">50</div>
+                                </div>
+                                <div class="rc-actions">
+                                    <button class="btn btn-ghost btn-sm"
+                                        onclick="optIn('rc5','Sewage Overflow — BTM 2nd Stage')">Opt In →</button>
+                                </div>
+                            </div>
+                            <div class="rc-body">
+                                <div class="rc-meta-row">
+                                    <span class="meta-chip"><span class="mc-icon">🌊</span> Sewage / Drain</span>
+                                    <span class="meta-chip"><span class="mc-icon">📅</span> First reported 4 days
+                                        ago</span>
+                                    <span class="meta-chip"><span class="mc-icon">🕐</span> Last updated 1 day
+                                        ago</span>
+                                </div>
+                                <p class="rc-desc">
+                                    Partial sewage drain overflow creating a stagnant water pool on the side road. 8
+                                    reports filed — lower volume but health risk is significant. Coordination with BBMP
+                                    sanitation may be needed.
+                                </p>
+                                <div class="rc-reports-bar">
+                                    <span class="rb-label">Civilian Reports</span>
+                                    <div class="rb-track">
+                                        <div class="rb-fill" style="width:38%"></div>
+                                    </div>
+                                    <span class="rb-count">8 reports</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card" id="rc6" data-priority="low" data-opted="false">
+                            <div class="rc-header">
+                                <div class="rc-rank">06</div>
+                                <span class="priority-badge pb-low">🟢 LOW</span>
+                                <div class="rc-title-wrap">
+                                    <div class="rc-title">Overflowing Bin — Jayanagar 4th Block</div>
+                                    <div class="rc-loc">📍 Jayanagar, Bengaluru · Near Shopping Complex</div>
+                                </div>
+                                <div class="rc-score-ring">
+                                    <svg width="52" height="52" viewBox="0 0 52 52">
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(34,197,94,.12)"
+                                            stroke-width="5" />
+                                        <circle cx="26" cy="26" r="21" fill="none" stroke="#4ade80" stroke-width="5"
+                                            stroke-dasharray="132" stroke-dashoffset="92" stroke-linecap="round" />
+                                    </svg>
+                                    <div class="score-num">30</div>
+                                </div>
+                                <div class="rc-actions">
+                                    <button class="btn btn-ghost btn-sm"
+                                        onclick="optIn('rc6','Overflowing Bin — Jayanagar 4th Block')">Opt In →</button>
+                                </div>
+                            </div>
+                            <div class="rc-body">
+                                <div class="rc-meta-row">
+                                    <span class="meta-chip"><span class="mc-icon">🗑️</span> Household Waste</span>
+                                    <span class="meta-chip"><span class="mc-icon">📅</span> First reported 1 day
+                                        ago</span>
+                                    <span class="meta-chip"><span class="mc-icon">🕐</span> Last updated 5 hr ago</span>
+                                </div>
+                                <p class="rc-desc">
+                                    Standard bin overflow. BBMP collection is scheduled for tomorrow but hasn't arrived.
+                                    Minor spillover on footpath. Low priority unless collection continues to be missed.
+                                </p>
+                                <div class="rc-reports-bar">
+                                    <span class="rb-label">Civilian Reports</span>
+                                    <div class="rb-track">
+                                        <div class="rb-fill" style="width:20%"></div>
+                                    </div>
+                                    <span class="rb-count">4 reports</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="sec-missions" class="completion-section" style="display:none">
+                    <div>
+                        <div class="sl">Task Management</div>
+                        <h2 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.5px">
+                            Active Missions
+                        </h2>
+                        <p style="font-size:.82rem;color:var(--tm);margin-top:4px">
+                            Missions your NGO has opted into. Upload before/after evidence to mark a task complete.
+                        </p>
+                    </div>
+
+                    <div class="active-missions-grid">
+
+                        <div class="glass mission-card">
+                            <span class="mc-badge mcb-active">🔵 In Progress</span>
+                            <h4>Construction Debris — 80 Feet Road</h4>
+                            <div class="mc-meta">📍 Indiranagar · Opted in 1 day ago · 3 volunteers assigned</div>
+                            <div class="progress-steps">
+                                <div class="ps-step done">
+                                    <div class="ps-circle">✓</div>
+                                </div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step done">
+                                    <div class="ps-circle">✓</div>
+                                </div>
+                                <div class="ps-line"></div>
+                                <div class="ps-step active">
+                                    <div class="ps-circle">3</div>
+                                </div>
+                                <div class="ps-line"></div>
+                                <div class="ps-step">
+                                    <div class="ps-circle">4</div>
+                                </div>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--tm);margin-bottom:14px">
+                                <span>Opted In</span><span>Team Assigned</span><span>Cleanup</span><span>Verified</span>
+                            </div>
+                            <p style="font-size:.8rem;color:var(--tm);margin-bottom:16px;line-height:1.6">
+                                Cleanup of construction debris on 80 Feet Road is underway. Upload before/after photos
+                                to close this mission.
+                            </p>
+                            <button class="btn btn-primary btn-full"
+                                onclick="openCompletion('rc4','Construction Debris — 80 Feet Road')">
+                                📸 Upload Before/After Photos
+                            </button>
+                        </div>
+
+                        <div class="glass mission-card" style="border-color:rgba(245,158,11,.25)">
+                            <span class="mc-badge mcb-pending">⏳ Awaiting Evidence</span>
+                            <h4>Overflowing Landfill — 5th Block</h4>
+                            <div class="mc-meta">📍 Koramangala · Opted in 3 hr ago · 5 volunteers assigned</div>
+                            <div class="progress-steps">
+                                <div class="ps-step done">
+                                    <div class="ps-circle">✓</div>
+                                </div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step done">
+                                    <div class="ps-circle">✓</div>
+                                </div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step done">
+                                    <div class="ps-circle">✓</div>
+                                </div>
+                                <div class="ps-line"></div>
+                                <div class="ps-step active">
+                                    <div class="ps-circle">4</div>
+                                </div>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--tm);margin-bottom:14px">
+                                <span>Opted In</span><span>Team Assigned</span><span>Cleanup</span><span>Verified</span>
+                            </div>
+                            <p style="font-size:.8rem;color:var(--tm);margin-bottom:16px;line-height:1.6">
+                                Cleanup completed by team. Now upload before and after photos to officially verify and
+                                close this report.
+                            </p>
+                            <button class="btn btn-amber btn-full"
+                                onclick="openCompletion('rc1','Overflowing Landfill — 5th Block')">
+                                📸 Submit Verification Photos
+                            </button>
+                        </div>
+
+                        <div class="glass mission-card" style="border-color:rgba(74,222,128,.3);opacity:.85">
+                            <span class="mc-badge mcb-done">✅ Verified Complete</span>
+                            <h4>Food Waste — BTM 2nd Stage</h4>
+                            <div class="mc-meta">📍 BTM Layout · Resolved 2 days ago · Impact: High</div>
+                            <div class="progress-steps">
+                                <div class="ps-step done">
+                                    <div class="ps-circle">✓</div>
+                                </div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step done">
+                                    <div class="ps-circle">✓</div>
+                                </div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step done">
+                                    <div class="ps-circle">✓</div>
+                                </div>
+                                <div class="ps-line" style="background:var(--gc)"></div>
+                                <div class="ps-step done">
+                                    <div class="ps-circle">✓</div>
+                                </div>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--tm);margin-bottom:14px">
+                                <span>Opted In</span><span>Team Assigned</span><span>Cleanup</span><span>Verified</span>
+                            </div>
+
+                            <div class="ba-grid" style="pointer-events:none">
+                                <div class="ba-zone has-image" style="border-style:solid;padding:8px">
+                                    <div style="position:relative">
+                                        <div
+                                            style="height:90px;background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(239,68,68,.05));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px">
+                                            📷</div>
+                                        <span class="ba-label ba-before">BEFORE</span>
+                                    </div>
+                                </div>
+                                <div class="ba-zone has-image" style="border-style:solid;padding:8px">
+                                    <div style="position:relative">
+                                        <div
+                                            style="height:90px;background:linear-gradient(135deg,rgba(34,197,94,.2),rgba(34,197,94,.05));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px">
+                                            📷</div>
+                                        <span class="ba-label ba-after">AFTER</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p style="font-size:.76rem;color:var(--gc);margin-top:6px;font-weight:600">
+                                ✓ Evidence verified · +350 XP earned · Report closed
+                            </p>
+                        </div>
+
+                        <div class="glass mission-card"
+                            style="border-style:dashed;border-color:var(--glass-b);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px">
+                            <div style="font-size:40px;opacity:.25;margin-bottom:12px">🎯</div>
+                            <p style="font-size:.85rem;color:var(--tm);text-align:center;margin-bottom:16px">
+                                Opt into more reports<br>to create new missions
+                            </p>
+                            <button class="btn btn-ghost btn-sm" onclick="showSection('reports')">Browse Reports
+                                →</button>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="sec-volunteers" class="vol-section" style="display:none">
+                    <div class="vol-header">
+                        <div>
+                            <div class="sl">Registered Volunteers</div>
+                            <h2
+                                style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.5px">
+                                Volunteer Pool
+                            </h2>
+                            <p style="font-size:.82rem;color:var(--tm);margin-top:4px">
+                                Volunteers who signed up via the EcoSense Citizen page and are available for assignment.
+                            </p>
+                        </div>
+                        <div class="hdr-actions">
+                            <button class="btn btn-ghost"
+                                onclick="toast('📧 Invitation sent to all available volunteers!','success')">📣
+                                Broadcast</button>
+                            <button class="btn btn-primary"
+                                onclick="document.getElementById('invite-card-sec').scrollIntoView({behavior:'smooth'})">+
+                                Invite</button>
+                        </div>
+                    </div>
+
+                    <div class="vol-grid">
+
+                        <div class="glass" style="border-radius:var(--r);overflow:hidden">
+                            <div
+                                style="padding:16px 18px;border-bottom:1px solid var(--glass-b);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                                <span
+                                    style="font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;color:var(--tp)">23
+                                    Volunteers</span>
+                                <span style="font-size:.75rem;color:var(--tm)">· 6 available · 12 assigned · 5 on
+                                    leave</span>
+                                <div style="margin-left:auto;display:flex;gap:8px">
+                                    <button class="filter-pill active" style="font-size:.72rem"
+                                        onclick="setVolFilter(this,'all')">All</button>
+                                    <button class="filter-pill" style="font-size:.72rem"
+                                        onclick="setVolFilter(this,'available')">Available</button>
+                                    <button class="filter-pill" style="font-size:.72rem"
+                                        onclick="setVolFilter(this,'assigned')">Assigned</button>
+                                </div>
+                            </div>
+                            <div class="vol-table-wrap">
+                                <table class="vol-table" id="vol-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Volunteer</th>
+                                            <th>Skills</th>
+                                            <th>Availability</th>
+                                            <th>Status</th>
+                                            <th>Assign To</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vol-tbody">
+                                        <tr data-status="available">
+                                            <td>
+                                                <div class="vol-name-cell">
+                                                    <div class="v-avatar">🌿</div>
+                                                    <div>
+                                                        <div class="v-name">Priya Menon</div>
+                                                        <div class="v-area">Koramangala · 4,820 XP</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="skill-tag">Cleanup</span><span
+                                                    class="skill-tag">Composting</span></td>
+                                            <td><span class="avail-dot green"></span> Mon–Sat</td>
+                                            <td><span class="vol-status-pill vsp-available">● Available</span></td>
+                                            <td><select class="assign-select" onchange="assignVol(this,'Priya Menon')">
+                                                    <option value="">Assign…</option>
+                                                    <option>80 Feet Road</option>
+                                                    <option>Varthur Lake Rd</option>
+                                                    <option>Forum Mall</option>
+                                                </select></td>
+                                            <td><button class="btn btn-ghost btn-sm"
+                                                    onclick="toast('📞 Contact sent to Priya Menon','info')">Contact</button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="assigned">
+                                            <td>
+                                                <div class="vol-name-cell">
+                                                    <div class="v-avatar">🌱</div>
+                                                    <div>
+                                                        <div class="v-name">Arjun Rao</div>
+                                                        <div class="v-area">Indiranagar · 4,410 XP</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="skill-tag">Field</span><span class="skill-tag">Data</span>
+                                            </td>
+                                            <td><span class="avail-dot green"></span> Weekends</td>
+                                            <td><span class="vol-status-pill vsp-assigned">● 80 Feet Rd</span></td>
+                                            <td><select class="assign-select">
+                                                    <option value="">Reassign…</option>
+                                                    <option>Varthur Lake Rd</option>
+                                                    <option>Forum Mall</option>
+                                                </select></td>
+                                            <td><button class="btn btn-ghost btn-sm"
+                                                    onclick="toast('📞 Contact sent to Arjun Rao','info')">Contact</button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="assigned">
+                                            <td>
+                                                <div class="vol-name-cell">
+                                                    <div class="v-avatar">♻️</div>
+                                                    <div>
+                                                        <div class="v-name">Sneha Patel</div>
+                                                        <div class="v-area">HSR Layout · 3,980 XP</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="skill-tag">Cleanup</span><span
+                                                    class="skill-tag">Awareness</span></td>
+                                            <td><span class="avail-dot amber"></span> Fri–Sun</td>
+                                            <td><span class="vol-status-pill vsp-assigned">● 80 Feet Rd</span></td>
+                                            <td><select class="assign-select">
+                                                    <option value="">Reassign…</option>
+                                                    <option>Forum Mall</option>
+                                                    <option>BTM Stage 2</option>
+                                                </select></td>
+                                            <td><button class="btn btn-ghost btn-sm"
+                                                    onclick="toast('📞 Contact sent to Sneha Patel','info')">Contact</button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="available">
+                                            <td>
+                                                <div class="vol-name-cell">
+                                                    <div class="v-avatar">🍃</div>
+                                                    <div>
+                                                        <div class="v-name">Kiran Sharma</div>
+                                                        <div class="v-area">Whitefield · 3,640 XP</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="skill-tag">Hazmat</span><span
+                                                    class="skill-tag">Field</span></td>
+                                            <td><span class="avail-dot green"></span> Mon–Fri</td>
+                                            <td><span class="vol-status-pill vsp-available">● Available</span></td>
+                                            <td><select class="assign-select" onchange="assignVol(this,'Kiran Sharma')">
+                                                    <option value="">Assign…</option>
+                                                    <option>Varthur Lake Rd</option>
+                                                    <option>80 Feet Rd</option>
+                                                    <option>Forum Mall</option>
+                                                </select></td>
+                                            <td><button class="btn btn-ghost btn-sm"
+                                                    onclick="toast('📞 Contact sent to Kiran Sharma','info')">Contact</button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="available">
+                                            <td>
+                                                <div class="vol-name-cell">
+                                                    <div class="v-avatar">🌍</div>
+                                                    <div>
+                                                        <div class="v-name">Lakshmi Nair</div>
+                                                        <div class="v-area">BTM Layout · 3,290 XP</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="skill-tag">Educator</span><span
+                                                    class="skill-tag">Schools</span></td>
+                                            <td><span class="avail-dot green"></span> Mon–Sun</td>
+                                            <td><span class="vol-status-pill vsp-available">● Available</span></td>
+                                            <td><select class="assign-select" onchange="assignVol(this,'Lakshmi Nair')">
+                                                    <option value="">Assign…</option>
+                                                    <option>Forum Mall</option>
+                                                    <option>Jayanagar</option>
+                                                </select></td>
+                                            <td><button class="btn btn-ghost btn-sm"
+                                                    onclick="toast('📞 Contact sent to Lakshmi Nair','info')">Contact</button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="busy">
+                                            <td>
+                                                <div class="vol-name-cell">
+                                                    <div class="v-avatar">🔋</div>
+                                                    <div>
+                                                        <div class="v-name">Rahul Verma</div>
+                                                        <div class="v-area">Jayanagar · 2,880 XP</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="skill-tag">E-Waste</span><span
+                                                    class="skill-tag">Hazmat</span></td>
+                                            <td><span class="avail-dot red"></span> Weekends</td>
+                                            <td><span class="vol-status-pill vsp-busy">● On Leave</span></td>
+                                            <td><span style="font-size:.72rem;color:var(--tm)">Unavailable</span></td>
+                                            <td><button class="btn btn-ghost btn-sm"
+                                                    onclick="toast('📞 Contact sent to Rahul Verma','info')">Contact</button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="assigned">
+                                            <td>
+                                                <div class="vol-name-cell">
+                                                    <div class="v-avatar">🌿</div>
+                                                    <div>
+                                                        <div class="v-name">Divya Krishnan</div>
+                                                        <div class="v-area">Koramangala · 2,640 XP</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="skill-tag">Cleanup</span><span
+                                                    class="skill-tag">Data</span></td>
+                                            <td><span class="avail-dot green"></span> Tue–Sun</td>
+                                            <td><span class="vol-status-pill vsp-assigned">● 5th Block</span></td>
+                                            <td><select class="assign-select">
+                                                    <option value="">Reassign…</option>
+                                                    <option>Varthur Lake Rd</option>
+                                                    <option>Forum Mall</option>
+                                                </select></td>
+                                            <td><button class="btn btn-ghost btn-sm"
+                                                    onclick="toast('📞 Contact sent to Divya Krishnan','info')">Contact</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="vol-sidebar">
+                            <div class="glass vol-stat-card">
+                                <div class="vs-header">
+                                    <h4>Skill Distribution</h4>
+                                </div>
+                                <div class="vol-stat-row">
+                                    <div class="v-avatar" style="width:28px;height:28px;font-size:12px">🧹</div>
+                                    <div class="vsr-bar-wrap">
+                                        <div class="vsr-label"><span>Field Cleanup</span><span>14</span></div>
+                                        <div class="vsr-track">
+                                            <div class="vsr-fill"
+                                                style="width:61%;background:linear-gradient(90deg,var(--gd),var(--gb))">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="vol-stat-row">
+                                    <div class="v-avatar" style="width:28px;height:28px;font-size:12px">🧪</div>
+                                    <div class="vsr-bar-wrap">
+                                        <div class="vsr-label"><span>Hazmat Trained</span><span>4</span></div>
+                                        <div class="vsr-track">
+                                            <div class="vsr-fill"
+                                                style="width:17%;background:linear-gradient(90deg,#7f1d1d,var(--red))">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="vol-stat-row">
+                                    <div class="v-avatar" style="width:28px;height:28px;font-size:12px">📢</div>
+                                    <div class="vsr-bar-wrap">
+                                        <div class="vsr-label"><span>Awareness / Edu</span><span>7</span></div>
+                                        <div class="vsr-track">
+                                            <div class="vsr-fill"
+                                                style="width:30%;background:linear-gradient(90deg,#92400e,var(--amber))">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="vol-stat-row">
+                                    <div class="v-avatar" style="width:28px;height:28px;font-size:12px">📊</div>
+                                    <div class="vsr-bar-wrap">
+                                        <div class="vsr-label"><span>Data / Analytics</span><span>5</span></div>
+                                        <div class="vsr-track">
+                                            <div class="vsr-fill"
+                                                style="width:22%;background:linear-gradient(90deg,#1e3a5f,var(--blue))">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="vol-stat-row">
+                                    <div class="v-avatar" style="width:28px;height:28px;font-size:12px">🌱</div>
+                                    <div class="vsr-bar-wrap">
+                                        <div class="vsr-label"><span>Composting</span><span>6</span></div>
+                                        <div class="vsr-track">
+                                            <div class="vsr-fill"
+                                                style="width:26%;background:linear-gradient(90deg,var(--gd),#a3e635)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="glass" style="border-radius:var(--r)">
+                                <div style="padding:14px 16px;border-bottom:1px solid var(--glass-b)">
+                                    <span
+                                        style="font-family:'Syne',sans-serif;font-size:.88rem;font-weight:800;color:var(--tp)">Top
+                                        Skills</span>
+                                </div>
+                                <div class="skill-cloud">
+                                    <span class="sk-tag" style="font-size:.8rem">🧹 Cleanup</span>
+                                    <span class="sk-tag">🌱 Composting</span>
+                                    <span class="sk-tag">🧪 Hazmat</span>
+                                    <span class="sk-tag">📢 Awareness</span>
+                                    <span class="sk-tag">📊 Data</span>
+                                    <span class="sk-tag">🏫 Schools</span>
+                                    <span class="sk-tag">♻️ Recycling</span>
+                                    <span class="sk-tag">🔋 E-Waste</span>
+                                    <span class="sk-tag">🌊 Drain</span>
+                                    <span class="sk-tag">📱 Digital</span>
+                                    <span class="sk-tag">🚗 Logistics</span>
+                                </div>
+                            </div>
+
+                            <div class="glass invite-card" id="invite-card-sec">
+                                <h4>📨 Send Invite Link</h4>
+                                <p style="font-size:.76rem;color:var(--tm);margin-bottom:14px;line-height:1.6">
+                                    Volunteers register via the EcoSense Citizen page. Share this NGO-specific signup
+                                    link to recruit directly.
+                                </p>
+                                <div class="fg">
+                                    <label>Your NGO Code</label>
+                                    <div style="display:flex;gap:8px">
+                                        <input class="fc" value="GREENBRIDGE-BLR" readonly
+                                            style="font-family:monospace;font-size:.82rem" />
+                                        <button class="btn btn-ghost btn-sm"
+                                            onclick="toast('🔗 Code copied!','success')"
+                                            style="flex-shrink:0;padding:9px 14px">Copy</button>
+                                    </div>
+                                </div>
+                                <div class="fg">
+                                    <label>Send invite to email</label>
+                                    <input class="fc" placeholder="recruit@example.com" id="invite-email" />
+                                </div>
+                                <button class="btn btn-primary btn-full" onclick="sendInvite()">📨 Send Invite</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+            </main>
+        </div>
+        <div class="modal-overlay" id="completion-modal">
+            <div class="modal-box">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+                    <div>
+                        <div class="sl" style="margin-bottom:6px">Task Verification</div>
+                        <h3 id="modal-title">Mark Mission Complete</h3>
+                    </div>
+                    <button onclick="closeModal()"
+                        style="background:none;border:none;color:var(--tm);font-size:20px;cursor:pointer;padding:4px">✕</button>
+                </div>
+                <p class="modal-sub" id="modal-sub">Upload before and after photos to officially verify cleanup
+                    completion. Both images are required.</p>
+
+                <div class="modal-ba-grid">
+                    <div class="modal-zone" id="modal-before-zone" ondragover="event.preventDefault()"
+                        ondrop="modalDrop(event,'before')">
+                        <input type="file" accept="image/*" onchange="modalFileSelect(event,'before')" />
+                        <div id="modal-before-content">
+                            <span class="mz-badge mz-before-b">📷 BEFORE</span>
+                            <span class="mz-ico">🗑️</span>
+                            <div class="mz-label">Before Cleanup Photo</div>
+                            <div class="mz-sub">Photo of the garbage site before your team arrived</div>
+                        </div>
+                        <div id="modal-before-preview" style="display:none" class="preview-img-wrap">
+                            <span class="mz-badge mz-before-b" style="display:inline-block;margin-bottom:8px">📷
+                                BEFORE</span>
+                            <img id="modal-before-img" src="" alt="Before" />
+                            <button class="rm" onclick="clearModalImg(event,'before')">✕</button>
+                        </div>
+                    </div>
+                    <div class="modal-zone" id="modal-after-zone" ondragover="event.preventDefault()"
+                        ondrop="modalDrop(event,'after')">
+                        <input type="file" accept="image/*" onchange="modalFileSelect(event,'after')" />
+                        <div id="modal-after-content">
+                            <span class="mz-badge mz-after-b">✅ AFTER</span>
+                            <span class="mz-ico">🌿</span>
+                            <div class="mz-label">After Cleanup Photo</div>
+                            <div class="mz-sub">Photo confirming the area is clean and resolved</div>
+                        </div>
+                        <div id="modal-after-preview" style="display:none" class="preview-img-wrap">
+                            <span class="mz-badge mz-after-b" style="display:inline-block;margin-bottom:8px">✅
+                                AFTER</span>
+                            <img id="modal-after-img" src="" alt="After" />
+                            <button class="rm" onclick="clearModalImg(event,'after')">✕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-notes fg">
+                    <label>Completion Notes (optional)</label>
+                    <textarea class="fc" id="modal-notes"
+                        placeholder="Describe what was done, amount of waste removed, any issues faced…"></textarea>
+                </div>
+                <div class="fg">
+                    <label>Volunteers Who Participated</label>
+                    <input class="fc" id="modal-vols" placeholder="e.g. Priya M., Arjun R., Sneha P." />
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitCompletion()">✅ Submit Verification</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast-root"></div>
+
+        <script>
+            /* ══════════════════════════════════
+               NAV TABS & SECTION SWITCHING
+               ══════════════════════════════════ */
+            const SECTIONS = { reports: 'sec-reports', missions: 'sec-missions', volunteers: 'sec-volunteers' };
+
+            function showSection(key) {
+                Object.values(SECTIONS).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                const target = document.getElementById(SECTIONS[key]);
+                if (target) { target.style.display = 'flex'; target.style.flexDirection = 'column'; }
+                // Update sidebar
+                document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+                // Update nav tabs
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            }
+
+            function switchTab(el, key) {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                el.classList.add('active');
+                showSection(key);
+                // Also update sidebar active
+                const map = { reports: 0, missions: 1, volunteers: 3 };
+                const items = document.querySelectorAll('.sb-item');
+                items.forEach(i => i.classList.remove('active'));
+                if (items[map[key]]) items[map[key]].classList.add('active');
+            }
+
+            /* ══════════════════════════════════
+               OPT-IN FLOW
+               ══════════════════════════════════ */
+            function optIn(cardId, title) {
+                const card = document.getElementById(cardId);
+                if (!card) return;
+
+                // Show inline confirm
+                const confirmBanner = document.createElement('div');
+                confirmBanner.style.cssText = `
+    position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+    background:rgba(10,22,16,.97);border:1px solid var(--glass-bb);
+    border-radius:16px;padding:20px 28px;z-index:600;
+    text-align:center;max-width:420px;width:90%;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    animation:slideUp .25s ease;
+  `;
+                confirmBanner.innerHTML = `
+    <div style="font-size:28px;margin-bottom:10px">🎯</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--tp);margin-bottom:6px">Opt In to This Mission?</div>
+    <div style="font-size:.8rem;color:var(--tm);margin-bottom:18px;line-height:1.6">${title}<br>Your NGO will be responsible for resolving this issue.</div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button onclick="confirmOptIn('${cardId}','${title}',this.closest('[style]'))" class="btn btn-primary btn-sm">✅ Confirm Opt-In</button>
+      <button onclick="this.closest('[style]').remove()" class="btn btn-ghost btn-sm">Cancel</button>
+    </div>
+  `;
+                document.body.appendChild(confirmBanner);
+            }
+
+            function confirmOptIn(cardId, title, banner) {
+                if (banner) banner.remove();
+                const card = document.getElementById(cardId);
+                if (!card) return;
+
+                card.classList.add('opted-in');
+                card.dataset.opted = 'true';
+
+                // Replace action button
+                const actionWrap = card.querySelector('.rc-actions');
+                actionWrap.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="openCompletion('${cardId}','${title}')">✅ Mark Complete</button>`;
+
+                // Add status bar
+                if (!card.querySelector('.status-bar')) {
+                    const sb = document.createElement('div');
+                    sb.className = 'status-bar';
+                    sb.innerHTML = `
+      <span class="status-dot" style="background:var(--amber)"></span>
+      <span class="st-label">Mission Accepted</span>
+      <span class="st-sub">· Just now · Assign volunteers</span>
+      <button class="btn btn-primary btn-sm ml-auto" onclick="showSection('volunteers')">Assign Volunteers →</button>
+    `;
+                    card.appendChild(sb);
+                }
+
+                toast(`🎯 Opted in: "${title.substring(0, 32)}…"`, 'success');
+                toast('🙋 Head to Volunteers to assign your team!', 'info');
+            }
+
+            /* ══════════════════════════════════
+               FILTER LOGIC
+               ══════════════════════════════════ */
+            function setFilter(el, type) {
+                document.querySelectorAll('.filter-bar .filter-pill').forEach(p => p.classList.remove('active'));
+                el.classList.add('active');
+                document.querySelectorAll('#report-list .report-card').forEach(card => {
+                    const priority = card.dataset.priority;
+                    const opted = card.dataset.opted === 'true';
+                    let show = true;
+                    if (type === 'critical') show = priority === 'critical';
+                    else if (type === 'high') show = priority === 'high';
+                    else if (type === 'medium') show = priority === 'medium';
+                    else if (type === 'low') show = priority === 'low';
+                    else if (type === 'opted') show = opted;
+                    card.style.display = show ? '' : 'none';
+                });
+            }
+
+            function filterSearch(val) {
+                const q = val.toLowerCase();
+                document.querySelectorAll('#report-list .report-card').forEach(card => {
+                    const text = card.innerText.toLowerCase();
+                    card.style.display = text.includes(q) ? '' : 'none';
+                });
+            }
+
+            /* ══════════════════════════════════
+               VOLUNTEER FILTER
+               ══════════════════════════════════ */
+            function setVolFilter(el, type) {
+                document.querySelectorAll('.vol-header ~ .vol-grid .filter-pill').forEach(p => p.classList.remove('active'));
+                // Select from parent area
+                el.closest('.glass').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                el.classList.add('active');
+                document.querySelectorAll('#vol-tbody tr').forEach(row => {
+                    const s = row.dataset.status;
+                    let show = true;
+                    if (type === 'available') show = s === 'available';
+                    else if (type === 'assigned') show = s === 'assigned';
+                    else if (type === 'busy') show = s === 'busy';
+                    row.style.display = show ? '' : 'none';
+                });
+            }
+
+            function assignVol(select, name) {
+                const mission = select.value;
+                if (!mission) return;
+                toast(`🙋 ${name} assigned to "${mission}"`, 'success');
+                // Update status pill in row
+                const row = select.closest('tr');
+                const pill = row.querySelector('.vol-status-pill');
+                if (pill) { pill.className = 'vol-status-pill vsp-assigned'; pill.textContent = '● ' + mission; }
+                row.dataset.status = 'assigned';
+            }
+
+            /* ══════════════════════════════════
+               COMPLETION MODAL
+               ══════════════════════════════════ */
+            let currentCompletionCard = null;
+
+            function openCompletion(cardId, title) {
+                currentCompletionCard = cardId;
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-sub').textContent = `Upload before and after photos to officially verify cleanup of: ${title}`;
+                clearModalImg(null, 'before');
+                clearModalImg(null, 'after');
+                document.getElementById('modal-notes').value = '';
+                document.getElementById('modal-vols').value = '';
+                document.getElementById('completion-modal').classList.add('open');
+            }
+
+            function closeModal() {
+                document.getElementById('completion-modal').classList.remove('open');
+            }
+
+            function modalFileSelect(e, side) {
+                const file = e.target.files[0];
+                if (file) showModalPreview(file, side);
+            }
+
+            function modalDrop(e, side) {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) showModalPreview(file, side);
+            }
+
+            function showModalPreview(file, side) {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    const img = document.getElementById(`modal-${side}-img`);
+                    img.src = ev.target.result;
+                    document.getElementById(`modal-${side}-content`).style.display = 'none';
+                    document.getElementById(`modal-${side}-preview`).style.display = 'block';
+                    document.getElementById(`modal-${side}-zone`).classList.add('has-img');
+                    toast(`📸 ${side === 'before' ? 'Before' : 'After'} photo loaded!`, 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function clearModalImg(e, side) {
+                if (e) e.stopPropagation();
+                document.getElementById(`modal-${side}-img`).src = '';
+                document.getElementById(`modal-${side}-content`).style.display = 'block';
+                document.getElementById(`modal-${side}-preview`).style.display = 'none';
+                document.getElementById(`modal-${side}-zone`).classList.remove('has-img');
+            }
+
+            function submitCompletion() {
+                const bSrc = document.getElementById('modal-before-img').src;
+                const aSrc = document.getElementById('modal-after-img').src;
+                if (!bSrc) { toast('⚠️ Please upload the BEFORE photo', 'warn'); return; }
+                if (!aSrc) { toast('⚠️ Please upload the AFTER photo', 'warn'); return; }
+
+                // Mark card as resolved
+                if (currentCompletionCard) {
+                    const card = document.getElementById(currentCompletionCard);
+                    if (card) {
+                        card.classList.add('resolved');
+                        const sb = card.querySelector('.status-bar');
+                        if (sb) { sb.style.background = 'rgba(34,197,94,.08)'; sb.innerHTML = `<span class="status-dot" style="background:var(--gc)"></span><span class="st-label" style="color:var(--gb)">✅ Verified Complete</span><span class="st-sub">· Evidence submitted · +350 XP</span>`; }
+                        const btn = card.querySelector('.rc-actions button');
+                        if (btn) { btn.textContent = '✓ Resolved'; btn.disabled = true; btn.style.opacity = '.5'; }
+                    }
+                }
+
+                closeModal();
+                toast('🎉 Mission verified! Great work, EcoWarriors.', 'success');
+                setTimeout(() => toast('🏅 +350 XP earned for GreenBridge NGO', 'info'), 1200);
+                setTimeout(() => toast('📋 Report marked as Resolved in community feed', 'success'), 2400);
+            }
+
+            /* ══════════════════════════════════
+               VOLUNTEER INVITE
+               ══════════════════════════════════ */
+            function sendInvite() {
+                const email = document.getElementById('invite-email').value.trim();
+                if (!email || !email.includes('@')) { toast('⚠️ Please enter a valid email', 'warn'); return; }
+                toast(`📨 Invite sent to ${email}`, 'success');
+                document.getElementById('invite-email').value = '';
+            }
+
+            /* ══════════════════════════════════
+               TOAST
+               ══════════════════════════════════ */
+            function toast(msg, type = 'info') {
+                const root = document.getElementById('toast-root');
+                const icons = { success: '✅', info: 'ℹ️', warn: '⚠️', error: '❌' };
+                const colors = { success: 'var(--gc)', info: 'var(--blue)', warn: 'var(--amber)', error: 'var(--red)' };
+                const el = document.createElement('div');
+                el.className = 'toast';
+                el.style.borderLeft = `3px solid ${colors[type]}`;
+                el.innerHTML = `<span style="font-size:15px">${icons[type]}</span><span>${msg}</span>`;
+                root.appendChild(el);
+                setTimeout(() => { el.style.transition = 'all .35s'; el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; setTimeout(() => el.remove(), 350); }, 3500);
+            }
+
+            /* ══════════════════════════════════
+               INIT
+               ══════════════════════════════════ */
+            // Show reports section by default
+            document.getElementById('sec-reports').style.display = 'flex';
+            document.getElementById('sec-reports').style.flexDirection = 'column';
+
+            // Close modal on overlay click
+            document.getElementById('completion-modal').addEventListener('click', e => {
+                if (e.target === e.currentTarget) closeModal();
+            });
+
+            // Welcome toasts
+            setTimeout(() => toast('🌿 Welcome back, GreenBridge NGO!', 'success'), 600);
+            setTimeout(() => toast('🔴 2 critical reports need urgent attention', 'warn'), 1800);
+        </script>
+</body>
+
+</html>

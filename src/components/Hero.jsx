@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, MapPin, ChevronRight } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 
 const stats = [
   { num: '2,847', label: 'Issues Reported' },
@@ -9,6 +10,8 @@ const stats = [
 ]
 
 export default function Hero() {
+  const { loginWithGoogle } = useAuth()
+  
   return (
     <section id="home" className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-28 pb-16 overflow-hidden">
       {/* Atmospheric orbs */}
@@ -76,15 +79,15 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.4 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <a
-            href="Civilian_log.html"
+          <button
+            onClick={loginWithGoogle}
             className="group relative flex items-center gap-2.5 px-8 py-4 rounded-full bg-gradient-to-r from-lime-400 to-eco-300 text-eco-950 font-bold text-base shadow-[0_0_30px_rgba(163,230,53,0.3)] hover:shadow-[0_0_50px_rgba(163,230,53,0.5)] hover:-translate-y-1 hover:scale-[1.03] transition-all duration-300"
             id="cta-get-started"
           >
             <Sparkles className="w-4.5 h-4.5" />
             Get Started
             <ArrowRight className="w-4.5 h-4.5 group-hover:translate-x-1 transition-transform" />
-          </a>
+          </button>
 
           <a
             href="#report"
@@ -102,6 +105,21 @@ export default function Hero() {
             <MapPin className="w-4 h-4 text-eco-400" />
             View Map
             <ChevronRight className="w-4 h-4 text-eco-400/50" />
+          </a>
+        </motion.div>
+
+        {/* NGO Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.5 }}
+          className="mt-6"
+        >
+          <a
+            href="#ngo-login"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-eco-400/20 bg-eco-400/5 text-eco-200/80 hover:text-eco-100 hover:bg-eco-400/10 hover:border-eco-400/30 transition-all duration-300 text-sm font-medium shadow-[0_0_15px_rgba(74,222,128,0.05)] hover:shadow-[0_0_20px_rgba(74,222,128,0.1)]"
+          >
+            Are you an NGO? <span className="text-lime-400 ml-1">Click here.</span>
           </a>
         </motion.div>
       </div>

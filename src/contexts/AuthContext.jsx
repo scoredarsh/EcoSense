@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { auth, db } from '../firebase'
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth'
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 
 const AuthContext = createContext()
@@ -52,8 +52,28 @@ export function AuthProvider({ children }) {
 
   const logout = () => signOut(auth)
 
+  const loginWithEmail = async (email, password) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      return userCredential
+    } catch (error) {
+      console.error('Email Login Failed:', error)
+      throw error
+    }
+  }
+
+  const signupWithEmail = async (email, password) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      return userCredential
+    } catch (error) {
+      console.error('Email Signup Failed:', error)
+      throw error
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loginWithGoogle, logout, loading }}>
+    <AuthContext.Provider value={{ user, loginWithGoogle, loginWithEmail, signupWithEmail, logout, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   )
