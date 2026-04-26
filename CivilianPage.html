@@ -1,0 +1,2614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSense – Community Waste Intelligence</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #060d0a;
+            --bg-mid: #0a1610;
+            --bg-card: rgba(10, 28, 18, 0.6);
+            --glass: rgba(16, 42, 26, 0.55);
+            --glass-border: rgba(52, 211, 105, 0.15);
+            --glass-border-bright: rgba(52, 211, 105, 0.35);
+            --green-core: #22c55e;
+            --green-bright: #4ade80;
+            --green-dim: #16a34a;
+            --green-glow: rgba(34, 197, 94, 0.25);
+            --green-ultra: rgba(34, 197, 94, 0.08);
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --text-primary: #e2fae9;
+            --text-secondary: #86efac;
+            --text-muted: #4b7a5e;
+            --radius: 18px;
+            --radius-sm: 10px;
+            --blur: blur(20px);
+            --shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --glow-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ── BACKGROUND ATMOSPHERE ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 15% 20%, rgba(34, 197, 94, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 60% at 85% 80%, rgba(16, 150, 60, 0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 30% 30% at 50% 50%, rgba(34, 197, 94, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Animated noise grain overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='<http://www.w3.org/2000/svg>'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--green-dim);
+            border-radius: 3px;
+        }
+
+        /* ── GLASS MIXIN ── */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 40px;
+            background: rgba(6, 13, 10, 0.8);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: var(--green-bright);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-logo .leaf {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--green-core), var(--green-bright));
+            border-radius: 50% 10px 50% 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 0 16px var(--green-glow);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 30px;
+            transition: all 0.25s;
+            letter-spacing: 0.3px;
+        }
+
+        .nav-links a:hover {
+            color: var(--green-bright);
+            background: var(--green-ultra);
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--green-dim), var(--green-core));
+            color: #fff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 0 20px var(--green-glow);
+            transition: all 0.25s !important;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 30px var(--green-glow) !important;
+            background: var(--green-ultra) !important;
+            color: var(--green-bright) !important;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 40px 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        .greeting-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border-bright);
+            border-radius: 30px;
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            color: var(--green-bright);
+            margin-bottom: 28px;
+            animation: fadeSlideDown 0.7s ease both;
+            cursor: pointer;
+        }
+
+        .greeting-pill .dot {
+            width: 7px;
+            height: 7px;
+            background: var(--green-core);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.4);
+            }
+        }
+
+        @keyframes fadeSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(3rem, 7vw, 6.5rem);
+            font-weight: 800;
+            line-height: 1.0;
+            letter-spacing: -2px;
+            animation: fadeSlideUp 0.8s 0.1s ease both;
+            max-width: 900px;
+        }
+
+        .hero h1 .accent {
+            background: linear-gradient(90deg, var(--green-core), var(--green-bright), #a3e635);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 560px;
+            line-height: 1.75;
+            margin: 24px auto 40px;
+            font-weight: 300;
+            animation: fadeSlideUp 0.8s 0.2s ease both;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeSlideUp 0.8s 0.3s ease both;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.25s;
+            text-decoration: none;
+        }
+
+        .btn-get-started {
+            background: linear-gradient(135deg, #a3e635, var(--green-bright));
+            color: var(--bg-deep) !important;
+            /* Dark text for high contrast on bright lime */
+            font-weight: 800 !important;
+            box-shadow: 0 0 25px rgba(163, 230, 53, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-get-started:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 40px rgba(163, 230, 53, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--green-dim), var(--green-core));
+            color: #fff;
+            box-shadow: 0 0 30px var(--green-glow), 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 50px var(--green-glow), 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-ghost {
+            background: var(--glass);
+            border: 1px solid var(--glass-border-bright);
+            color: var(--text-secondary);
+            backdrop-filter: var(--blur);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--green-core);
+            color: var(--green-bright);
+            transform: translateY(-2px);
+        }
+
+        /* ── STATS BAR ── */
+        .stats-bar {
+            display: flex;
+            gap: 2px;
+            background: rgba(10, 22, 16, 0.9);
+            border: 1px solid var(--glass-border);
+            border-radius: 60px;
+            padding: 6px;
+            margin: 60px auto 0;
+            width: fit-content;
+            animation: fadeIn 0.8s 0.5s ease both;
+            opacity: 0;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 28px;
+            border-radius: 50px;
+            transition: all 0.25s;
+        }
+
+        .stat-item:hover {
+            background: var(--green-ultra);
+        }
+
+        .stat-item .num {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--green-bright);
+            line-height: 1;
+        }
+
+        .stat-item .lbl {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: var(--glass-border);
+            margin: 8px 0;
+        }
+
+        /* ── SECTION COMMON ── */
+        section {
+            padding: 80px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--green-core);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 14px;
+        }
+
+        .section-label::before {
+            content: '';
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: var(--green-core);
+            border-radius: 2px;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.8rem, 3.5vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+
+        /* ── GREETING CARD ── */
+        .greeting-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .greeting-card {
+            padding: 44px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .greeting-card::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .greeting-card .user-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--green-dim), var(--green-bright));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 24px var(--green-glow);
+        }
+
+        .greeting-card .greeting-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .greeting-card .greeting-name span {
+            color: var(--green-bright);
+        }
+
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(90deg, rgba(34, 197, 94, 0.15), rgba(74, 222, 128, 0.1));
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--green-bright);
+            margin-bottom: 24px;
+        }
+
+        .xp-bar-wrap {
+            margin-bottom: 8px;
+        }
+
+        .xp-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .xp-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green-dim), var(--green-bright));
+            border-radius: 10px;
+            width: 68%;
+            position: relative;
+        }
+
+        .xp-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 0 10px 10px 0;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                opacity: 0.3
+            }
+
+            50% {
+                opacity: 0.8
+            }
+        }
+
+        /* ── USER RATING ── */
+        .rating-card {
+            padding: 44px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 6px;
+            margin: 20px 0 12px;
+        }
+
+        .star {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.15s, filter 0.15s;
+            filter: grayscale(0.6);
+        }
+
+        .star:hover,
+        .star.active {
+            filter: none;
+            transform: scale(1.2);
+        }
+
+        .rating-count {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* ── UPLOAD ── */
+        .upload-section {}
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--glass-border-bright);
+            border-radius: var(--radius);
+            padding: 60px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.drag-over {
+            border-color: var(--green-core);
+            background: var(--green-ultra);
+            transform: scale(1.01);
+        }
+
+        .upload-icon {
+            width: 72px;
+            height: 72px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border-bright);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 20px;
+            transition: all 0.3s;
+        }
+
+        .upload-zone:hover .upload-icon {
+            background: linear-gradient(135deg, var(--green-dim), var(--green-core));
+            box-shadow: 0 0 30px var(--green-glow);
+        }
+
+        .upload-zone h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .category-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        .pill {
+            padding: 7px 16px;
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pill:hover,
+        .pill.active {
+            border-color: var(--green-core);
+            color: var(--green-bright);
+            background: var(--green-ultra);
+        }
+
+        .severity-select {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .severity-select:focus {
+            border-color: var(--green-core);
+        }
+
+        textarea.report-desc {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 100px;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 14px;
+        }
+
+        textarea.report-desc:focus {
+            border-color: var(--green-core);
+        }
+
+        textarea.report-desc::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* ── MAP ── */
+        .map-section-wrap {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 24px;
+        }
+
+        .map-container {
+            position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            height: 480px;
+        }
+
+        .map-svg-bg {
+            width: 100%;
+            height: 100%;
+            background: #0c1e14;
+            position: relative;
+        }
+
+        .map-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .map-pin {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .map-pin:hover {
+            transform: scale(1.2) translateY(-3px);
+        }
+
+        .map-pin .pin-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            box-shadow: 0 0 12px currentColor;
+            position: relative;
+        }
+
+        .map-pin .pin-dot::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .map-pin .pin-pulse {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            animation: mapPulse 2s infinite;
+            opacity: 0;
+        }
+
+        @keyframes mapPulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 0.6
+            }
+
+            100% {
+                transform: scale(1.8);
+                opacity: 0
+            }
+        }
+
+        .pin-red .pin-dot {
+            background: var(--red);
+            color: var(--red);
+        }
+
+        .pin-red .pin-pulse {
+            color: var(--red);
+        }
+
+        .pin-amber .pin-dot {
+            background: var(--amber);
+            color: var(--amber);
+        }
+
+        .pin-amber .pin-pulse {
+            color: var(--amber);
+        }
+
+        .pin-green .pin-dot {
+            background: var(--green-core);
+            color: var(--green-core);
+        }
+
+        .pin-green .pin-pulse {
+            color: var(--green-core);
+        }
+
+        .map-tooltip {
+            position: absolute;
+            background: rgba(6, 13, 10, 0.95);
+            border: 1px solid var(--glass-border-bright);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.78rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .map-tooltip.visible {
+            opacity: 1;
+        }
+
+        .map-overlay-tools {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .map-tool-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(6, 13, 10, 0.9);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .map-tool-btn:hover,
+        .map-tool-btn.active {
+            border-color: var(--green-core);
+            color: var(--green-bright);
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .draw-mode-indicator {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid var(--green-core);
+            border-radius: 25px;
+            padding: 7px 18px;
+            font-size: 0.8rem;
+            color: var(--green-bright);
+            display: none;
+        }
+
+        .draw-mode-indicator.visible {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        /* Area drawn polygon */
+        .area-polygon {
+            position: absolute;
+            pointer-events: none;
+            border: 2px dashed rgba(34, 197, 94, 0.5);
+            background: rgba(34, 197, 94, 0.06);
+            border-radius: 6px;
+        }
+
+        /* Map sidebar */
+        .map-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .map-legend {
+            padding: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .nearby-mini {
+            padding: 20px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .nearby-mini h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--text-primary);
+        }
+
+        .issue-mini {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .issue-mini:last-child {
+            border-bottom: none;
+        }
+
+        .issue-mini:hover {
+            padding-left: 6px;
+        }
+
+        .issue-mini-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        .issue-mini-info .title {
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .issue-mini-info .meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* ── VOLUNTEER ── */
+        .volunteer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .volunteer-card {
+            padding: 32px 28px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .volunteer-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--green-core);
+            box-shadow: var(--glow-shadow);
+        }
+
+        .volunteer-card .vc-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
+            border: 1px solid var(--glass-border-bright);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 18px;
+        }
+
+        .volunteer-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .volunteer-card p {
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .volunteer-card .spots {
+            font-size: 0.75rem;
+            color: var(--green-bright);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .volunteer-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid var(--glass-border);
+        }
+
+        .volunteer-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .volunteer-toggle.on {
+            background: var(--green-core);
+            border-color: var(--green-core);
+            box-shadow: 0 0 12px var(--green-glow);
+        }
+
+        .volunteer-toggle.on::after {
+            left: calc(100% - 18px);
+            background: #fff;
+        }
+
+        /* ── REPORT STATUS ── */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .status-card {
+            padding: 28px;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .status-header .report-id {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .status-header .report-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .status-chip.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--amber);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-chip.progress {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-chip.resolved {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--green-bright);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: var(--glass-border);
+        }
+
+        .tl-item {
+            position: relative;
+            margin-bottom: 14px;
+            padding-left: 16px;
+            font-size: 0.8rem;
+        }
+
+        .tl-item::before {
+            content: '';
+            position: absolute;
+            left: -14px;
+            top: 5px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            border: 2px solid var(--bg-deep);
+        }
+
+        .tl-item.done::before {
+            background: var(--green-core);
+            box-shadow: 0 0 8px var(--green-glow);
+        }
+
+        .tl-item.current::before {
+            background: var(--amber);
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+        }
+
+        .tl-item .tl-text {
+            color: var(--text-secondary);
+        }
+
+        .tl-item .tl-time {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            margin-top: 2px;
+        }
+
+        /* ── FEED ── */
+        .feed-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feed-item {
+            display: flex;
+            gap: 16px;
+            padding: 22px;
+            transition: all 0.25s;
+            cursor: pointer;
+        }
+
+        .feed-item:hover {
+            transform: translateX(4px);
+            border-color: var(--glass-border-bright);
+        }
+
+        .feed-thumb {
+            width: 72px;
+            height: 72px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 42, 26, 0.8));
+            border: 1px solid var(--glass-border);
+        }
+
+        .feed-body {
+            flex: 1;
+        }
+
+        .feed-category {
+            font-size: 0.7rem;
+            color: var(--green-core);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .feed-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .feed-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .feed-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .feed-meta .dist {
+            color: var(--green-bright);
+        }
+
+        .feed-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            color: var(--green-bright);
+            border-color: var(--green-core);
+            background: var(--green-ultra);
+        }
+
+        .action-btn.liked {
+            color: var(--red);
+            border-color: var(--red);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        /* ── SOCIAL SHARE ── */
+        .share-section {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .share-card {
+            max-width: 700px;
+            margin: 40px auto 0;
+            padding: 50px 48px;
+        }
+
+        .share-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 36px;
+        }
+
+        .score-ring {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(var(--green-core) 264deg, rgba(255, 255, 255, 0.08) 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 16px;
+            box-shadow: 0 0 40px var(--green-glow);
+        }
+
+        .score-ring::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            background: var(--bg-deep);
+            border-radius: 50%;
+        }
+
+        .score-inner {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .score-inner .score-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--green-bright);
+            line-height: 1;
+        }
+
+        .score-inner .score-lbl {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 40px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.25s;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .share-tw {
+            background: rgba(29, 161, 242, 0.15);
+            color: #1da1f2;
+            border: 1px solid rgba(29, 161, 242, 0.3);
+        }
+
+        .share-tw:hover {
+            background: rgba(29, 161, 242, 0.25);
+            box-shadow: 0 0 20px rgba(29, 161, 242, 0.2);
+        }
+
+        .share-wa {
+            background: rgba(37, 211, 102, 0.15);
+            color: #25d366;
+            border: 1px solid rgba(37, 211, 102, 0.3);
+        }
+
+        .share-wa:hover {
+            background: rgba(37, 211, 102, 0.25);
+            box-shadow: 0 0 20px rgba(37, 211, 102, 0.2);
+        }
+
+        .share-fb {
+            background: rgba(24, 119, 242, 0.15);
+            color: #1877f2;
+            border: 1px solid rgba(24, 119, 242, 0.3);
+        }
+
+        .share-fb:hover {
+            background: rgba(24, 119, 242, 0.25);
+            box-shadow: 0 0 20px rgba(24, 119, 242, 0.2);
+        }
+
+        .share-cp {
+            background: var(--glass);
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .share-cp:hover {
+            border-color: var(--green-core);
+            color: var(--green-bright);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            padding: 40px;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .footer-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--green-bright);
+            margin-bottom: 16px;
+        }
+
+        /* ── TOAST ── */
+        #toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: rgba(10, 22, 16, 0.95);
+            border: 1px solid var(--glass-border-bright);
+            border-radius: 12px;
+            font-size: 0.88rem;
+            min-width: 280px;
+            backdrop-filter: blur(20px);
+            animation: toastIn 0.4s ease;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast .toast-icon {
+            font-size: 20px;
+        }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-box {
+            background: #0a1a10;
+            border: 1px solid var(--glass-border-bright);
+            border-radius: var(--radius);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            border-color: var(--green-core);
+            color: var(--green-bright);
+        }
+
+        /* ── UPLOAD PREVIEW ── */
+        .upload-preview {
+            display: none;
+            width: 100%;
+            height: 200px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .upload-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-preview .preview-label {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            color: var(--green-bright);
+        }
+
+        /* ── AREA MARKING ── */
+        .marking-info {
+            padding: 18px;
+            margin-top: 16px;
+            border-radius: var(--radius-sm);
+            background: rgba(34, 197, 94, 0.06);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .marking-info.visible {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            nav {
+                padding: 14px 20px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            section {
+                padding: 60px 20px;
+            }
+
+            .greeting-section,
+            .upload-grid,
+            .map-section-wrap,
+            .volunteer-grid,
+            .status-grid,
+            .feed-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 100px 20px 50px;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                border-radius: var(--radius);
+            }
+
+            .stat-divider {
+                width: 80%;
+                height: 1px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+    ```
+
+</head>
+
+<body>
+
+    ```
+    <!-- NAV -->
+    <nav>
+        <div class="nav-logo">
+            <div class="leaf">🌿</div>
+            EcoSense
+        </div>
+        <div class="nav-links">
+            <a href="#report">Report</a>
+            <a href="#map">Map</a>
+            <a href="#volunteer">Volunteer</a>
+            <a href="#feed">Issues</a>
+            <a href="#share">Share</a>
+            <a href="#report" class="nav-btn">+ New Report</a>
+        </div>
+    </nav>
+
+    <div class="page-wrap">
+
+        <!-- ── HERO ── -->
+        <section class="hero" id="home">
+            <div class="greeting-pill" onclick="openGreetingModal()">
+                <span class="dot"></span>
+                👋 Welcome back, EcoWarrior!
+            </div>
+
+            <h1>
+                Your Community.<br>
+                <span class="accent">Cleaner Planet.</span>
+            </h1>
+
+            <p>Report waste dumps, track cleanup progress, and coordinate with local volunteers — all in one powerful
+                platform built for environmental changemakers.</p>
+
+            <div class="hero-actions">
+                <a href="Civilian_log.html" class="btn btn-get-started">🚀 Get Started</a>
+
+                <a href="#report" class="btn btn-primary">📸 Report a Dump</a>
+                <a href="#map" class="btn btn-ghost">🗺️ View Community Map</a>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="num">2,847</span>
+                    <span class="lbl">Issues Reported</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="num">1,203</span>
+                    <span class="lbl">Resolved</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="num">486</span>
+                    <span class="lbl">Volunteers</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="num">38</span>
+                    <span class="lbl">Active Today</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── GREETING + RATING ── -->
+        <section id="profile" style="padding-top: 0;">
+            <div class="greeting-section">
+
+                <div class="glass greeting-card">
+                    <div class="user-avatar">🌱</div>
+                    <div class="greeting-name">Good evening,<br><span id="user-name-display">EcoWarrior</span>!</div>
+                    <div class="level-badge">⚡ Level 12 — Urban Ranger</div>
+                    <div class="xp-bar-wrap">
+                        <div class="xp-label">
+                            <span>Experience Points</span>
+                            <span style="color: var(--green-bright)">1,340 / 2,000 XP</span>
+                        </div>
+                        <div class="xp-bar">
+                            <div class="xp-fill"></div>
+                        </div>
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--text-muted); margin-top:16px;">You've reported <strong
+                            style="color:var(--green-bright)">23 issues</strong> this month. You're in the top 8% of
+                        contributors!</p>
+
+                    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="openNameModal()"
+                            style="padding:10px 20px; font-size:0.85rem;">✏️ Edit Profile</button>
+                        <button class="btn btn-ghost" onclick="showToast('🏆 Leaderboard coming soon!', 'info')"
+                            style="padding:10px 20px; font-size:0.85rem;">📊 Leaderboard</button>
+                    </div>
+                </div>
+
+                <div class="glass rating-card">
+                    <div class="section-label">Community Trust</div>
+                    <h3 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;">Your Impact Rating</h3>
+                    <div class="rating-stars" id="stars">
+                        <span class="star active" data-v="1">⭐</span>
+                        <span class="star active" data-v="2">⭐</span>
+                        <span class="star active" data-v="3">⭐</span>
+                        <span class="star active" data-v="4">⭐</span>
+                        <span class="star" data-v="5">⭐</span>
+                    </div>
+                    <div class="rating-count">4.2 / 5 · Rated by 187 community members</div>
+
+                    <div class="badges">
+                        <span class="badge">🗑️ Waste Spotter</span>
+                        <span class="badge">🌍 Earth First</span>
+                        <span class="badge">🤝 Team Player</span>
+                        <span class="badge">📸 Photo Pro</span>
+                        <span class="badge">🔥 7-Day Streak</span>
+                    </div>
+
+                    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
+                        <div
+                            style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">
+                            Rate This Platform</div>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <div id="platform-stars" style="display:flex;gap:4px;font-size:1.5rem;cursor:pointer;">
+                                <span class="pstar" data-v="1">☆</span>
+                                <span class="pstar" data-v="2">☆</span>
+                                <span class="pstar" data-v="3">☆</span>
+                                <span class="pstar" data-v="4">☆</span>
+                                <span class="pstar" data-v="5">☆</span>
+                            </div>
+                            <span style="font-size:0.78rem;color:var(--text-muted)">Tap to rate</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── REPORT UPLOAD ── -->
+        <section id="report">
+            <div class="section-label">Report Issue</div>
+            <h2>Spot a Dump? <span style="color:var(--green-core)">Report It.</span></h2>
+            <p style="color:var(--text-muted);max-width:500px;font-size:0.92rem;line-height:1.7;margin-top:8px;">Your
+                reports go directly to municipal authorities and local volunteers. Every submission makes a difference.
+            </p>
+
+            <div class="upload-grid">
+
+                <div>
+                    <div class="upload-zone glass" id="upload-zone"
+                        onclick="document.getElementById('file-input').click()"
+                        ondragover="event.preventDefault();this.classList.add('drag-over')"
+                        ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+                        <div class="upload-icon">📷</div>
+                        <h3>Drop Your Photo Here</h3>
+                        <p>Drag & drop or click to upload.<br>Supports JPG, PNG, HEIC up to 20MB</p>
+                        <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
+                        <div class="upload-preview" id="upload-preview">
+                            <img id="preview-img" src="" alt="Preview">
+                            <div class="preview-label">📍 Location auto-detected</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass" style="padding: 32px;">
+                    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:18px;">Report
+                        Details</div>
+
+                    <div
+                        style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">
+                        Waste Type</div>
+                    <div class="category-pills" id="category-pills">
+                        <button class="pill active" onclick="selectPill(this)">🗑️ General</button>
+                        <button class="pill" onclick="selectPill(this)">🏭 Industrial</button>
+                        <button class="pill" onclick="selectPill(this)">⚗️ Hazardous</button>
+                        <button class="pill" onclick="selectPill(this)">♻️ Recyclable</button>
+                        <button class="pill" onclick="selectPill(this)">🌊 Water Body</button>
+                        <button class="pill" onclick="selectPill(this)">🌳 Forest Area</button>
+                    </div>
+
+                    <div
+                        style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;margin-top:16px;">
+                        Severity Level</div>
+                    <select class="severity-select" id="severity">
+                        <option value="">Select severity…</option>
+                        <option value="low">🟢 Low — Minor littering</option>
+                        <option value="medium">🟡 Medium — Moderate dump</option>
+                        <option value="high">🔴 High — Large illegal dump</option>
+                        <option value="critical">🚨 Critical — Hazardous / Urgent</option>
+                    </select>
+
+                    <textarea class="report-desc" id="report-desc"
+                        placeholder="Describe what you see — size, smell, any visible hazardous materials…"></textarea>
+
+                    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="submitReport()">
+                        🚀 Submit Report
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ── MAP ── -->
+        <section id="map">
+            <div class="section-label">Community Map</div>
+            <h2>Waste Issues <span style="color:var(--green-core)">Near You</span></h2>
+            <p style="color:var(--text-muted);max-width:500px;font-size:0.92rem;line-height:1.7;margin-top:8px;">Live
+                map of reported issues. Click a pin for details. Use the area tool to mark zones you want to work on.
+            </p>
+
+            <div class="map-section-wrap">
+
+                <div class="map-container">
+                    <div class="map-svg-bg" id="map-svg">
+                        <div class="map-grid"></div>
+
+                        <!-- Decorative roads -->
+                        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.15"
+                            viewBox="0 0 760 480">
+                            <path d="M0 240 Q200 200 380 240 Q560 280 760 240" stroke="#22c55e" stroke-width="2"
+                                fill="none" />
+                            <path d="M380 0 Q360 120 380 240 Q400 360 380 480" stroke="#22c55e" stroke-width="2"
+                                fill="none" />
+                            <path d="M0 120 Q190 160 380 120 Q570 80 760 120" stroke="#22c55e" stroke-width="1.5"
+                                fill="none" stroke-dasharray="8,8" />
+                            <path d="M0 360 Q190 320 380 360 Q570 400 760 360" stroke="#22c55e" stroke-width="1.5"
+                                fill="none" stroke-dasharray="8,8" />
+                            <path d="M190 0 Q170 120 190 240 Q210 360 190 480" stroke="#22c55e" stroke-width="1.5"
+                                fill="none" stroke-dasharray="8,8" />
+                            <path d="M570 0 Q550 120 570 240 Q590 360 570 480" stroke="#22c55e" stroke-width="1.5"
+                                fill="none" stroke-dasharray="8,8" />
+                            <!-- Park zone -->
+                            <rect x="280" y="150" width="200" height="130" rx="20" fill="rgba(34,197,94,0.07)"
+                                stroke="rgba(34,197,94,0.15)" stroke-width="1" />
+                            <text x="380" y="222" text-anchor="middle" fill="rgba(34,197,94,0.4)" font-size="11"
+                                font-family="DM Sans">Central Park</text>
+                        </svg>
+
+                        <!-- Map Pins -->
+                        <div class="map-pin pin-red" style="left:22%;top:28%" title="Illegal dump near market"
+                            data-info="🔴 Koramangala Market — Illegal dump, 50kg debris">
+                            <div class="pin-dot"></div>
+                            <div class="pin-pulse"></div>
+                        </div>
+                        <div class="map-pin pin-red" style="left:68%;top:55%" title="Chemical waste"
+                            data-info="🔴 Whitefield Industrial — Chemical waste, critical">
+                            <div class="pin-dot"></div>
+                            <div class="pin-pulse"></div>
+                        </div>
+                        <div class="map-pin pin-amber" style="left:45%;top:22%" title="Roadside dump"
+                            data-info="🟡 MG Road Overpass — Mixed waste, medium severity">
+                            <div class="pin-dot"></div>
+                            <div class="pin-pulse"></div>
+                        </div>
+                        <div class="map-pin pin-amber" style="left:78%;top:30%" title="Plastic littering"
+                            data-info="🟡 Indiranagar Lake — Plastic dumping, ongoing">
+                            <div class="pin-dot"></div>
+                            <div class="pin-pulse"></div>
+                        </div>
+                        <div class="map-pin pin-green" style="left:33%;top:60%" title="Resolved"
+                            data-info="✅ BTM Layout — Cleaned up by volunteers, 3 days ago">
+                            <div class="pin-dot"></div>
+                        </div>
+                        <div class="map-pin pin-green" style="left:55%;top:72%" title="Resolved"
+                            data-info="✅ Jayanagar Park — Removed by municipality, last week">
+                            <div class="pin-dot"></div>
+                        </div>
+                        <div class="map-pin pin-amber" style="left:14%;top:68%" title="Construction debris"
+                            data-info="🟡 Banashankari — Construction waste, low priority">
+                            <div class="pin-dot"></div>
+                            <div class="pin-pulse"></div>
+                        </div>
+
+                        <!-- Your area marker (pre-drawn) -->
+                        <div class="area-polygon" id="drawn-area"
+                            style="left:38%;top:32%;width:120px;height:85px;display:none;"></div>
+
+                        <!-- Map controls -->
+                        <div class="map-overlay-tools">
+                            <div class="map-tool-btn" title="Zoom In"
+                                onclick="showToast('🔍 Zoom controls coming with live map integration','info')">+</div>
+                            <div class="map-tool-btn" title="Zoom Out">−</div>
+                            <div class="map-tool-btn active" title="My Location"
+                                onclick="showToast('📍 Location: Bengaluru, Karnataka','success')">◉</div>
+                            <div class="map-tool-btn" title="Mark Work Area" id="mark-btn" onclick="toggleMarkMode()">✏️
+                            </div>
+                            <div class="map-tool-btn" title="Heatmap"
+                                onclick="showToast('🌡️ Heatmap view activated','success')">⊞</div>
+                        </div>
+
+                        <div class="draw-mode-indicator" id="draw-indicator">
+                            ✏️ Click & drag on the map to mark your work area
+                        </div>
+
+                        <div class="map-tooltip" id="map-tooltip"></div>
+                    </div>
+                </div>
+
+                <div class="map-sidebar">
+                    <div class="glass map-legend">
+                        <div style="font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;margin-bottom:14px;">
+                            Legend</div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></div>
+                            Critical / High Priority
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--amber);box-shadow:0 0 8px var(--amber)">
+                            </div>Pending / Medium
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot"
+                                style="background:var(--green-core);box-shadow:0 0 8px var(--green-glow)"></div>Resolved
+                            / Cleaned
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot"
+                                style="background:rgba(34,197,94,0.3);border:1px dashed var(--green-core)"></div>Your
+                            Work Area
+                        </div>
+
+                        <div class="marking-info" id="marking-info">
+                            ✅ Area marked! Volunteers in this zone will be notified.
+                        </div>
+                    </div>
+
+                    <div class="glass nearby-mini">
+                        <h4>Nearby Issues</h4>
+                        <div class="issue-mini" onclick="showToast('📍 Opening Koramangala Market report…','info')">
+                            <div class="issue-mini-dot" style="background:var(--red)"></div>
+                            <div class="issue-mini-info">
+                                <div class="title">Koramangala Market</div>
+                                <div class="meta">0.3 km · 2h ago</div>
+                            </div>
+                        </div>
+                        <div class="issue-mini" onclick="showToast('📍 Opening MG Road report…','info')">
+                            <div class="issue-mini-dot" style="background:var(--amber)"></div>
+                            <div class="issue-mini-info">
+                                <div class="title">MG Road Overpass</div>
+                                <div class="meta">0.8 km · 5h ago</div>
+                            </div>
+                        </div>
+                        <div class="issue-mini" onclick="showToast('📍 Opening Indiranagar Lake report…','info')">
+                            <div class="issue-mini-dot" style="background:var(--amber)"></div>
+                            <div class="issue-mini-info">
+                                <div class="title">Indiranagar Lake</div>
+                                <div class="meta">1.2 km · 1d ago</div>
+                            </div>
+                        </div>
+                        <div class="issue-mini" onclick="showToast('📍 Opening Banashankari report…','info')">
+                            <div class="issue-mini-dot" style="background:var(--amber)"></div>
+                            <div class="issue-mini-info">
+                                <div class="title">Banashankari Zone</div>
+                                <div class="meta">2.1 km · 2d ago</div>
+                            </div>
+                        </div>
+                        <div class="issue-mini">
+                            <div class="issue-mini-dot" style="background:var(--green-core)"></div>
+                            <div class="issue-mini-info">
+                                <div class="title" style="color:var(--green-bright)">BTM Layout ✅</div>
+                                <div class="meta">2.5 km · Resolved</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ── VOLUNTEER ── -->
+        <section id="volunteer">
+            <div class="section-label">Get Involved</div>
+            <h2>Volunteer <span style="color:var(--green-core)">Opportunities</span></h2>
+            <p style="color:var(--text-muted);max-width:500px;font-size:0.92rem;line-height:1.7;margin-top:8px;">Join
+                local cleanup drives, mentor new reporters, or help coordinate municipal outreach. Toggle your
+                availability.</p>
+
+            <div class="volunteer-grid">
+
+                <div class="glass volunteer-card">
+                    <div class="volunteer-toggle" id="vt-1" onclick="toggleVolunteer(this, 'Weekend Cleanup Drive')">
+                    </div>
+                    <div class="vc-icon">🧹</div>
+                    <h3>Weekend Cleanup Drive</h3>
+                    <p>Join organized cleanup events every Saturday morning. Gear and transport provided. Perfect for
+                        first-timers.</p>
+                    <div class="spots">🟢 <span>12 spots remaining · This Saturday, 7AM</span></div>
+                </div>
+
+                <div class="glass volunteer-card">
+                    <div class="volunteer-toggle" id="vt-2" onclick="toggleVolunteer(this, 'Report Verification')">
+                    </div>
+                    <div class="vc-icon">🔍</div>
+                    <h3>Report Verification</h3>
+                    <p>Help verify community reports and assess severity from home. Requires 2+ hours/week commitment.
+                    </p>
+                    <div class="spots">🟢 <span>5 spots remaining · Remote, flexible</span></div>
+                </div>
+
+                <div class="glass volunteer-card">
+                    <div class="volunteer-toggle" id="vt-3" onclick="toggleVolunteer(this, 'School Outreach')"></div>
+                    <div class="vc-icon">🎓</div>
+                    <h3>School Outreach</h3>
+                    <p>Educate students about waste management and encourage them to be environmental reporters.</p>
+                    <div class="spots">🟡 <span>2 spots remaining · Weekdays, mornings</span></div>
+                </div>
+
+                <div class="glass volunteer-card">
+                    <div class="volunteer-toggle" id="vt-4" onclick="toggleVolunteer(this, 'Municipal Liaison')"></div>
+                    <div class="vc-icon">🏛️</div>
+                    <h3>Municipal Liaison</h3>
+                    <p>Bridge between community reports and BBMP. Help escalate critical issues to the right
+                        authorities.</p>
+                    <div class="spots">🔴 <span>Full · Join waitlist</span></div>
+                </div>
+
+                <div class="glass volunteer-card">
+                    <div class="volunteer-toggle" id="vt-5" onclick="toggleVolunteer(this, 'Drone Mapping')"></div>
+                    <div class="vc-icon">🚁</div>
+                    <h3>Drone Mapping</h3>
+                    <p>Use drones to map waste hotspots in hard-to-reach areas. Own equipment or use community drones.
+                    </p>
+                    <div class="spots">🟢 <span>8 spots remaining · On demand</span></div>
+                </div>
+
+                <div class="glass volunteer-card">
+                    <div class="volunteer-toggle" id="vt-6" onclick="toggleVolunteer(this, 'Data Analytics')"></div>
+                    <div class="vc-icon">📊</div>
+                    <h3>Data Analytics</h3>
+                    <p>Analyze waste patterns and create reports for city planners. Requires basic data skills.</p>
+                    <div class="spots">🟢 <span>10 spots remaining · Remote</span></div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ── REPORT STATUS ── -->
+        <section id="status">
+            <div class="section-label">Your Submissions</div>
+            <h2>Report <span style="color:var(--green-core)">Status</span></h2>
+            <p style="color:var(--text-muted);max-width:500px;font-size:0.92rem;line-height:1.7;margin-top:8px;">Track
+                the progress of your submitted reports from receipt to resolution.</p>
+
+            <div class="status-grid">
+
+                <div class="glass status-card">
+                    <div class="status-header">
+                        <div>
+                            <div class="report-id">RPT-2024-0847</div>
+                            <div class="report-title">Koramangala Illegal Dump</div>
+                        </div>
+                        <div class="status-chip progress">⚙️ In Progress</div>
+                    </div>
+                    <div class="timeline">
+                        <div class="tl-item done">
+                            <div class="tl-text">Report submitted with 3 photos</div>
+                            <div class="tl-time">Jan 14, 2:30 PM</div>
+                        </div>
+                        <div class="tl-item done">
+                            <div class="tl-text">Verified by community moderator</div>
+                            <div class="tl-time">Jan 14, 6:15 PM</div>
+                        </div>
+                        <div class="tl-item done">
+                            <div class="tl-text">Forwarded to BBMP Ward Officer</div>
+                            <div class="tl-time">Jan 15, 9:00 AM</div>
+                        </div>
+                        <div class="tl-item current">
+                            <div class="tl-text">Cleanup team dispatched</div>
+                            <div class="tl-time">Jan 16 · In progress</div>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-text">Cleanup confirmed & site verified</div>
+                            <div class="tl-time">Pending</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass status-card">
+                    <div class="status-header">
+                        <div>
+                            <div class="report-id">RPT-2024-0831</div>
+                            <div class="report-title">BTM Layout Roadside Waste</div>
+                        </div>
+                        <div class="status-chip resolved">✅ Resolved</div>
+                    </div>
+                    <div class="timeline">
+                        <div class="tl-item done">
+                            <div class="tl-text">Report submitted</div>
+                            <div class="tl-time">Jan 9, 11:00 AM</div>
+                        </div>
+                        <div class="tl-item done">
+                            <div class="tl-text">Verified by 4 community members</div>
+                            <div class="tl-time">Jan 9, 3:00 PM</div>
+                        </div>
+                        <div class="tl-item done">
+                            <div class="tl-text">Municipal team assigned</div>
+                            <div class="tl-time">Jan 10, 8:30 AM</div>
+                        </div>
+                        <div class="tl-item done">
+                            <div class="tl-text">Cleanup completed — 120kg removed</div>
+                            <div class="tl-time">Jan 11, 5:00 PM</div>
+                        </div>
+                        <div class="tl-item done">
+                            <div class="tl-text">Site verified clean ✅ +150 XP earned!</div>
+                            <div class="tl-time">Jan 12, 10:00 AM</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass status-card">
+                    <div class="status-header">
+                        <div>
+                            <div class="report-id">RPT-2024-0862</div>
+                            <div class="report-title">Indiranagar Lake Plastics</div>
+                        </div>
+                        <div class="status-chip pending">⏳ Pending Review</div>
+                    </div>
+                    <div class="timeline">
+                        <div class="tl-item done">
+                            <div class="tl-text">Report submitted with 2 photos</div>
+                            <div class="tl-time">Jan 16, 8:15 AM</div>
+                        </div>
+                        <div class="tl-item current">
+                            <div class="tl-text">Awaiting community verification</div>
+                            <div class="tl-time">1 of 3 verifications received</div>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-text">Forward to BBMP Lakes Division</div>
+                            <div class="tl-time">Pending</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass status-card">
+                    <div class="status-header">
+                        <div>
+                            <div class="report-id">RPT-2024-0819</div>
+                            <div class="report-title">MG Road Overpass Litter</div>
+                        </div>
+                        <div class="status-chip progress">⚙️ In Progress</div>
+                    </div>
+                    <div class="timeline">
+                        <div class="tl-item done">
+                            <div class="tl-text">Report submitted</div>
+                            <div class="tl-time">Jan 8, 7:45 PM</div>
+                        </div>
+                        <div class="tl-item done">
+                            <div class="tl-text">Verified — classified as medium priority</div>
+                            <div class="tl-time">Jan 9, 9:00 AM</div>
+                        </div>
+                        <div class="tl-item done">
+                            <div class="tl-text">Added to BBMP queue (position #14)</div>
+                            <div class="tl-time">Jan 9, 2:30 PM</div>
+                        </div>
+                        <div class="tl-item current">
+                            <div class="tl-text">Estimated cleanup: Jan 18–20</div>
+                            <div class="tl-time">Queue position: #3</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ── FEED ── -->
+        <section id="feed">
+            <div class="section-label">Community Feed</div>
+            <h2>Issues <span style="color:var(--green-core)">Near You</span></h2>
+            <p style="color:var(--text-muted);max-width:500px;font-size:0.92rem;line-height:1.7;margin-top:8px;">
+                Real-time reports from your neighborhood. Upvote to boost priority. Share to spread awareness.</p>
+
+            <div class="feed-grid">
+
+                <div class="glass feed-item">
+                    <div class="feed-thumb">🏭</div>
+                    <div class="feed-body">
+                        <div class="feed-category">Industrial Waste</div>
+                        <div class="feed-title">Chemical drums dumped near Sarjapur</div>
+                        <div class="feed-desc">Blue barrels with unknown chemical markings found near the drainage
+                            ditch. Foul smell reported by residents.</div>
+                        <div class="feed-meta">
+                            <span class="dist">📍 4.2 km</span>
+                            <span>🕐 3h ago</span>
+                            <span>👁 142 views</span>
+                        </div>
+                        <div class="feed-actions">
+                            <button class="action-btn" onclick="toggleLike(this)">👍 Upvote <span>28</span></button>
+                            <button class="action-btn" onclick="shareIssue('Chemical drums near Sarjapur')">📤
+                                Share</button>
+                            <button class="action-btn"
+                                onclick="showToast('🤝 Volunteering for this issue!','success')">🙋 Help</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass feed-item">
+                    <div class="feed-thumb">🌊</div>
+                    <div class="feed-body">
+                        <div class="feed-category">Water Contamination</div>
+                        <div class="feed-title">Garbage dumped in Bellandur Lake</div>
+                        <div class="feed-desc">Fresh dump of construction debris and domestic waste spotted on the
+                            western bank. Lake water turning dark.</div>
+                        <div class="feed-meta">
+                            <span class="dist">📍 6.1 km</span>
+                            <span>🕐 6h ago</span>
+                            <span>👁 89 views</span>
+                        </div>
+                        <div class="feed-actions">
+                            <button class="action-btn" onclick="toggleLike(this)">👍 Upvote <span>45</span></button>
+                            <button class="action-btn" onclick="shareIssue('Garbage in Bellandur Lake')">📤
+                                Share</button>
+                            <button class="action-btn"
+                                onclick="showToast('🤝 Volunteering for this issue!','success')">🙋 Help</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass feed-item">
+                    <div class="feed-thumb">🌳</div>
+                    <div class="feed-body">
+                        <div class="feed-category">Forest Encroachment</div>
+                        <div class="feed-title">Plastic bags clogging Cubbon Park drain</div>
+                        <div class="feed-desc">Storm drain at the northeast entrance blocked with plastic bags and food
+                            waste. Risk of flooding.</div>
+                        <div class="feed-meta">
+                            <span class="dist">📍 2.3 km</span>
+                            <span>🕐 1d ago</span>
+                            <span>👁 203 views</span>
+                        </div>
+                        <div class="feed-actions">
+                            <button class="action-btn liked" onclick="toggleLike(this)">👍 Upvote
+                                <span>67</span></button>
+                            <button class="action-btn" onclick="shareIssue('Drain blockage in Cubbon Park')">📤
+                                Share</button>
+                            <button class="action-btn"
+                                onclick="showToast('🤝 Volunteering for this issue!','success')">🙋 Help</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass feed-item">
+                    <div class="feed-thumb">♻️</div>
+                    <div class="feed-body">
+                        <div class="feed-category">Recyclable Waste</div>
+                        <div class="feed-title">E-waste pile at Silk Board Junction</div>
+                        <div class="feed-desc">TVs, monitors, and cables discarded on the footpath. Highly recyclable —
+                            needs specialist collection.</div>
+                        <div class="feed-meta">
+                            <span class="dist">📍 5.7 km</span>
+                            <span>🕐 2d ago</span>
+                            <span>👁 118 views</span>
+                        </div>
+                        <div class="feed-actions">
+                            <button class="action-btn" onclick="toggleLike(this)">👍 Upvote <span>33</span></button>
+                            <button class="action-btn" onclick="shareIssue('E-waste at Silk Board Junction')">📤
+                                Share</button>
+                            <button class="action-btn"
+                                onclick="showToast('🤝 Volunteering for this issue!','success')">🙋 Help</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ── SOCIAL SHARE ── -->
+        <section id="share" class="share-section">
+            <div class="section-label" style="justify-content:center;margin-bottom:12px;">Share & Inspire</div>
+            <h2>Spread the <span style="color:var(--green-core)">Movement</span></h2>
+            <p style="color:var(--text-muted);max-width:500px;margin:10px auto 0;font-size:0.92rem;line-height:1.7;">
+                Your impact score is your badge of honor. Share it to inspire others to join the eco-movement.</p>
+
+            <div class="glass share-card">
+                <div class="share-score">
+                    <div class="score-ring">
+                        <div class="score-inner">
+                            <div class="score-num">88</div>
+                            <div class="score-lbl">Eco Score</div>
+                        </div>
+                    </div>
+                    <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;">You're an <span
+                            style="color:var(--green-bright)">Urban Ranger</span></div>
+                    <div style="font-size:0.82rem;color:var(--text-muted);margin-top:6px;">23 reports · 3 cleanups · 486
+                        XP this month</div>
+                </div>
+
+                <div
+                    style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:12px;padding:16px 20px;margin-bottom:28px;font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+                    "I've reported 23 waste dumps in Bengaluru this month using <strong
+                        style="color:var(--green-bright)">@EcoSense</strong>. 12 have already been cleaned up! Join me
+                    in keeping our city clean 🌿 #EcoSense #CleanBengaluru"
+                </div>
+
+                <div class="share-buttons">
+                    <button class="share-btn share-tw" onclick="shareSocial('twitter')">🐦 Twitter / X</button>
+                    <button class="share-btn share-wa" onclick="shareSocial('whatsapp')">💬 WhatsApp</button>
+                    <button class="share-btn share-fb" onclick="shareSocial('facebook')">📘 Facebook</button>
+                    <button class="share-btn share-cp" onclick="copyLink()">🔗 Copy Link</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── FOOTER ── -->
+        <footer>
+            <div class="footer-logo">🌿 EcoSense</div>
+            <p>Community Waste Intelligence Platform · Bengaluru, India</p>
+            <p style="margin-top:8px;">Built with ♻️ for a cleaner planet · <span style="color:var(--green-core)">2024
+                    EcoSense</span></p>
+        </footer>
+
+    </div><!-- end page-wrap -->
+
+    <!-- ── TOAST CONTAINER ── -->
+    <div id="toast-container"></div>
+
+    <!-- ── NAME MODAL ── -->
+    <div class="modal-overlay" id="name-modal">
+        <div class="modal-box">
+            <div class="modal-close" onclick="closeModal('name-modal')">✕</div>
+            <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:8px;">Edit Profile
+            </div>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:24px;">Update your display name shown in
+                greetings and the community.</p>
+            <input type="text" id="name-input" placeholder="Your eco name…" value="EcoWarrior"
+                style="width:100%;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:14px 16px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;margin-bottom:16px;"
+                onfocus="this.style.borderColor='var(--green-core)'"
+                onblur="this.style.borderColor='var(--glass-border)'">
+            <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="saveName()">Save
+                Name</button>
+        </div>
+    </div>
+
+    <!-- ── JS ── -->
+    <script>
+        // ── MAP PIN TOOLTIPS ──
+        document.querySelectorAll('.map-pin').forEach(pin => {
+            const tooltip = document.getElementById('map-tooltip');
+            pin.addEventListener('mouseenter', (e) => {
+                tooltip.textContent = pin.dataset.info || 'View report';
+                tooltip.classList.add('visible');
+            });
+            pin.addEventListener('mousemove', (e) => {
+                const rect = document.getElementById('map-svg').getBoundingClientRect();
+                tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+                tooltip.style.top = (e.clientY - rect.top - 36) + 'px';
+            });
+            pin.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+            pin.addEventListener('click', () => {
+                showToast('📍 ' + (pin.dataset.info || 'Report details'), 'info');
+            });
+        });
+
+        // ── AREA MARKING ──
+        let markMode = false;
+        let drawing = false;
+        let startX, startY;
+
+        function toggleMarkMode() {
+            markMode = !markMode;
+            const btn = document.getElementById('mark-btn');
+            const ind = document.getElementById('draw-indicator');
+            btn.classList.toggle('active', markMode);
+            ind.classList.toggle('visible', markMode);
+            document.getElementById('map-svg').style.cursor = markMode ? 'crosshair' : 'default';
+            if (markMode) showToast('✏️ Draw mode ON — click & drag on the map', 'info');
+        }
+
+        const mapEl = document.getElementById('map-svg');
+        const drawnArea = document.getElementById('drawn-area');
+
+        mapEl.addEventListener('mousedown', (e) => {
+            if (!markMode) return;
+            const rect = mapEl.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+            drawing = true;
+            drawnArea.style.display = 'block';
+            drawnArea.style.left = startX + 'px';
+            drawnArea.style.top = startY + 'px';
+            drawnArea.style.width = '0px';
+            drawnArea.style.height = '0px';
+        });
+
+        mapEl.addEventListener('mousemove', (e) => {
+            if (!drawing) return;
+            const rect = mapEl.getBoundingClientRect();
+            const cx = e.clientX - rect.left;
+            const cy = e.clientY - rect.top;
+            drawnArea.style.left = Math.min(cx, startX) + 'px';
+            drawnArea.style.top = Math.min(cy, startY) + 'px';
+            drawnArea.style.width = Math.abs(cx - startX) + 'px';
+            drawnArea.style.height = Math.abs(cy - startY) + 'px';
+        });
+
+        mapEl.addEventListener('mouseup', () => {
+            if (!drawing) return;
+            drawing = false;
+            if (markMode) {
+                toggleMarkMode();
+                const info = document.getElementById('marking-info');
+                info.classList.add('visible');
+                showToast('✅ Work area marked! Nearby volunteers notified.', 'success');
+                setTimeout(() => info.classList.remove('visible'), 5000);
+            }
+        });
+
+        // ── FILE UPLOAD ──
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('upload-zone').classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) previewFile(file);
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) previewFile(file);
+        }
+
+        function previewFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const prev = document.getElementById('upload-preview');
+                document.getElementById('preview-img').src = e.target.result;
+                prev.style.display = 'block';
+                showToast('📸 Photo loaded! Add details and submit.', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ── REPORT SUBMIT ──
+        function submitReport() {
+            const severity = document.getElementById('severity').value;
+            const desc = document.getElementById('report-desc').value;
+            if (!severity) { showToast('⚠️ Please select a severity level', 'warn'); return; }
+            showToast('🚀 Report submitted! Tracking ID: RPT-2024-0' + Math.floor(Math.random() * 100 + 880), 'success');
+            document.getElementById('report-desc').value = '';
+            document.getElementById('severity').value = '';
+            document.getElementById('upload-preview').style.display = 'none';
+        }
+
+        // ── CATEGORY PILLS ──
+        function selectPill(el) {
+            document.querySelectorAll('.category-pills .pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // ── VOLUNTEER TOGGLE ──
+        function toggleVolunteer(el, name) {
+            el.classList.toggle('on');
+            if (el.classList.contains('on')) {
+                showToast('🙋 You signed up for: ' + name, 'success');
+            } else {
+                showToast('👋 Removed from: ' + name, 'info');
+            }
+        }
+
+        // ── RATING STARS ──
+        document.querySelectorAll('#stars .star').forEach(star => {
+            star.addEventListener('click', () => {
+                const val = parseInt(star.dataset.v);
+                document.querySelectorAll('#stars .star').forEach((s, i) => {
+                    s.classList.toggle('active', i < val);
+                });
+                showToast('⭐ Thanks for the ' + val + '-star rating!', 'success');
+            });
+        });
+
+        document.querySelectorAll('#platform-stars .pstar').forEach(star => {
+            star.addEventListener('click', () => {
+                const val = parseInt(star.dataset.v);
+                document.querySelectorAll('#platform-stars .pstar').forEach((s, i) => {
+                    s.textContent = i < val ? '⭐' : '☆';
+                });
+                showToast('🌟 Platform rated ' + val + '/5 — Thank you!', 'success');
+            });
+        });
+
+        // ── FEED ACTIONS ──
+        function toggleLike(btn) {
+            const isLiked = btn.classList.contains('liked');
+            const span = btn.querySelector('span');
+            const num = parseInt(span.textContent);
+            btn.classList.toggle('liked', !isLiked);
+            span.textContent = isLiked ? num - 1 : num + 1;
+            if (!isLiked) showToast('👍 Upvoted! This helps boost priority.', 'success');
+        }
+
+        function shareIssue(title) {
+            openShareModal(title);
+        }
+
+        // ── SOCIAL SHARE ──
+        function shareSocial(platform) {
+            const msg = encodeURIComponent("I reported a waste issue on EcoSense! Join me in keeping our city clean 🌿 #EcoSense #CleanCity");
+            const urls = {
+                twitter: `https://twitter.com/intent/tweet?text=${msg}`,
+                whatsapp: `https://wa.me/?text=${msg}`,
+                facebook: `https://www.facebook.com/sharer/sharer.php?u=https://ecosense.app&quote=${msg}`
+            };
+            window.open(urls[platform], '_blank', 'width=600,height=400');
+            showToast('📤 Opening ' + platform + '...', 'info');
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText('<https://ecosense.app/report/RPT-2024-0847>').then(() => {
+                showToast('🔗 Link copied to clipboard!', 'success');
+            }).catch(() => showToast('🔗 Link: ecosense.app/report', 'info'));
+        }
+
+        function openShareModal(title) {
+            showToast('📤 Sharing: "' + title + '"', 'info');
+        }
+
+        // ── NAME MODAL ──
+        function openNameModal() { document.getElementById('name-modal').classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        function saveName() {
+            const name = document.getElementById('name-input').value.trim() || 'EcoWarrior';
+            document.getElementById('user-name-display').textContent = name;
+            closeModal('name-modal');
+            showToast('✅ Name updated to "' + name + '"', 'success');
+        }
+
+        // Allow Enter in name input
+        document.getElementById('name-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') saveName();
+        });
+
+        // Close modal on overlay click
+        document.getElementById('name-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal('name-modal');
+        });
+
+        function openGreetingModal() { openNameModal(); }
+
+        // ── TOAST ──
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const icons = { success: '✅', info: 'ℹ️', warn: '⚠️', error: '❌' };
+            const colors = { success: 'var(--green-core)', info: '#60a5fa', warn: 'var(--amber)', error: 'var(--red)' };
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.borderLeftColor = colors[type];
+            toast.style.borderLeftWidth = '3px';
+            toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${msg}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.transition = 'all 0.4s';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(30px)';
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        }
+
+        // ── GREET BY TIME ──
+        const hour = new Date().getHours();
+        const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+        document.querySelector('.greeting-name').innerHTML = `${greet},<br><span id="user-name-display">EcoWarrior</span>!`;
+
+        // ── INIT TOAST ──
+        setTimeout(() => showToast('🌿 Welcome back! 3 new issues in your area.', 'success'), 800);
+    </script>
+</body>
+
+</html>

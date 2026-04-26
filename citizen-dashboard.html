@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoSense – Citizen Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <!-- ══════════════════════════════════════════════
+       REPLACE YOUR_API_KEY below with your actual
+       Google Maps JavaScript API key (enable Maps JS
+       API + Visualization library in Cloud Console).
+       ══════════════════════════════════════════════ -->
+  <script>
+    // Deferred so the page renders before the map loads
+    window.initMap = function () {
+      const center = { lat: 12.9716, lng: 77.5946 }; // Bengaluru default
+
+      const map = new google.maps.Map(document.getElementById('gmap'), {
+        zoom: 13,
+        center,
+        mapTypeId: 'roadmap',
+        styles: [
+          { elementType: 'geometry',        stylers: [{ color: '#0a1610' }] },
+          { elementType: 'labels.text.fill',stylers: [{ color: '#4b7a5e' }] },
+          { elementType: 'labels.text.stroke',stylers:[{ color: '#060d0a' }] },
+          { featureType: 'road',             elementType: 'geometry',    stylers:[{ color: '#0d2218' }] },
+          { featureType: 'road',             elementType: 'geometry.stroke',stylers:[{ color: '#060d0a' }] },
+          { featureType: 'water',            elementType: 'geometry',    stylers:[{ color: '#060d0a' }] },
+          { featureType: 'poi.park',         elementType: 'geometry',    stylers:[{ color: '#0d2218' }] },
+          { featureType: 'administrative',   elementType: 'geometry.stroke',stylers:[{ color: '#1a3a24' }] },
+          { featureType: 'transit.station',  elementType: 'geometry',    stylers:[{ color: '#0d1f16' }] },
+        ]
+      });
+
+      // ── Sample heatmap data points (lat, lng, weight) ──
+      const heatData = [
+        { location: new google.maps.LatLng(12.9780, 77.6068), weight: 10 },
+        { location: new google.maps.LatLng(12.9750, 77.6010), weight: 8  },
+        { location: new google.maps.LatLng(12.9700, 77.5900), weight: 5  },
+        { location: new google.maps.LatLng(12.9650, 77.5850), weight: 9  },
+        { location: new google.maps.LatLng(12.9800, 77.5800), weight: 3  },
+        { location: new google.maps.LatLng(12.9900, 77.6000), weight: 7  },
+        { location: new google.maps.LatLng(12.9600, 77.6100), weight: 6  },
+        { location: new google.maps.LatLng(12.9730, 77.5960), weight: 10 },
+        { location: new google.maps.LatLng(12.9820, 77.5920), weight: 4  },
+        { location: new google.maps.LatLng(12.9670, 77.6020), weight: 8  },
+        { location: new google.maps.LatLng(12.9690, 77.5880), weight: 6  },
+        { location: new google.maps.LatLng(12.9850, 77.6050), weight: 5  },
+      ];
+
+      const heatmap = new google.maps.visualization.HeatmapLayer({
+        data: heatData,
+        map,
+        radius: 50,
+        gradient: [
+          'rgba(0,255,0,0)',
+          'rgba(34,197,94,0.6)',
+          'rgba(253,224,71,0.7)',
+          'rgba(251,146,60,0.8)',
+          'rgba(239,68,68,1)',
+        ]
+      });
+
+      // Click to add a new waste report pin
+      map.addListener('click', (e) => {
+        const marker = new google.maps.Marker({
+          position: e.latLng,
+          map,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#ef4444',
+            fillOpacity: 0.9,
+            strokeColor: '#fca5a5',
+            strokeWeight: 2
+          },
+          animation: google.maps.Animation.DROP,
+          title: 'New Waste Report'
+        });
+        showToast('📍 Location pinned! Fill the report form below.', 'info');
+      });
+
+      window._heatmap = heatmap;
+    };
+  </script>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=visualization&callback=initMap">
+  </script>
+
+  <style>
+    /* ═══════════════════════════════════════
+       DESIGN TOKENS  (match EcoSense landing)
+       ═══════════════════════════════════════ */
+    :root {
+      --bg-deep:  #060d0a;
+      --bg-mid:   #0a1610;
+      --bg-card:  rgba(10,28,18,0.6);
+      --glass:    rgba(16,42,26,0.55);
+      --glass-border:        rgba(52,211,105,0.15);
+      --glass-border-bright: rgba(52,211,105,0.35);
+      --green-core:  #22c55e;
+      --green-bright:#4ade80;
+      --green-dim:   #16a34a;
+      --green-glow:  rgba(34,197,94,0.25);
+      --green-ultra: rgba(34,197,94,0.08);
+      --amber: #f59e0b;
+      --red:   #ef4444;
+      --text-primary:   #e2fae9;
+      --text-secondary: #86efac;
+      --text-muted:     #4b7a5e;
+      --radius:    18px;
+      --radius-sm: 10px;
+      --blur:   blur(20px);
+      --shadow: 0 8px 40px rgba(0,0,0,0.5);
+      --glow-shadow: 0 0 30px rgba(34,197,94,0.2);
+    }
+
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 20%, rgba(34,197,94,0.08) 0%,transparent 60%),
+        radial-gradient(ellipse 50% 60% at 85% 80%, rgba(16,150,60,0.07) 0%,transparent 60%),
+        radial-gradient(ellipse 30% 30% at 50% 50%, rgba(34,197,94,0.04) 0%,transparent 70%);
+      pointer-events:none; z-index:0;
+    }
+    body::after {
+      content:''; position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size:200px 200px; pointer-events:none; z-index:0; opacity:0.5;
+    }
+
+    .page-wrap { position:relative; z-index:1; }
+
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background:var(--green-dim); border-radius:3px; }
+
+    /* ── GLASS UTIL ── */
+    .glass {
+      background:var(--glass);
+      backdrop-filter:var(--blur);
+      -webkit-backdrop-filter:var(--blur);
+      border:1px solid var(--glass-border);
+      border-radius:var(--radius);
+    }
+
+    /* ── NAV ── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 40px;
+      background:rgba(6,13,10,0.85);
+      backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--glass-border);
+    }
+    .nav-logo {
+      display:flex; align-items:center; gap:10px;
+      font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem;
+      color:var(--green-bright); letter-spacing:-0.5px; text-decoration:none;
+    }
+    .nav-logo .leaf {
+      width:32px; height:32px;
+      background:linear-gradient(135deg,var(--green-core),var(--green-bright));
+      border-radius:50% 10px 50% 10px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; box-shadow:0 0 16px var(--green-glow);
+    }
+    .nav-links { display:flex; gap:6px; align-items:center; }
+    .nav-links a {
+      color:var(--text-secondary); text-decoration:none;
+      font-size:0.85rem; font-weight:500; padding:7px 14px;
+      border-radius:30px; transition:all 0.25s; letter-spacing:0.3px;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color:var(--green-bright); background:var(--green-ultra);
+    }
+    .nav-links a.active { color:var(--green-bright); }
+    .nav-btn {
+      background:linear-gradient(135deg,var(--green-dim),var(--green-core));
+      color:#fff !important; font-weight:600 !important;
+      box-shadow:0 0 20px var(--green-glow);
+    }
+    .nav-btn:hover {
+      transform:translateY(-1px);
+      box-shadow:0 0 30px var(--green-glow) !important;
+    }
+
+    /* ── LAYOUT ── */
+    .dashboard-shell {
+      padding-top:80px;
+      display:block;
+      min-height:100vh;
+      width:100%;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position:fixed; top:80px; left:0; bottom:0; width:260px;
+      background:rgba(6,13,10,0.92);
+      backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+      border-right:1px solid var(--glass-border);
+      padding:28px 16px;
+      display:flex; flex-direction:column; gap:4px;
+      overflow-y:auto;
+      z-index:90;
+    }
+    .sidebar-section-label {
+      font-size:0.65rem; font-weight:600; letter-spacing:2px;
+      text-transform:uppercase; color:var(--text-muted);
+      padding:14px 12px 6px;
+    }
+    .sidebar-item {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 14px; border-radius:12px;
+      color:var(--text-secondary); text-decoration:none;
+      font-size:0.875rem; font-weight:500;
+      cursor:pointer; transition:all 0.2s;
+      border:1px solid transparent;
+    }
+    .sidebar-item:hover {
+      background:var(--green-ultra);
+      color:var(--green-bright);
+      border-color:var(--glass-border);
+    }
+    .sidebar-item.active {
+      background:rgba(34,197,94,0.12);
+      color:var(--green-bright);
+      border-color:var(--glass-border-bright);
+    }
+    .sidebar-item .icon {
+      width:34px; height:34px; border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; flex-shrink:0;
+    }
+    .sidebar-item.active .icon { background:rgba(34,197,94,0.2); }
+    .sidebar-badge {
+      margin-left:auto; background:var(--red);
+      color:#fff; font-size:0.65rem; font-weight:700;
+      padding:2px 7px; border-radius:20px; min-width:20px; text-align:center;
+    }
+    .sidebar-badge.green {
+      background:linear-gradient(135deg,var(--green-dim),var(--green-core));
+    }
+    .sidebar-divider { height:1px; background:var(--glass-border); margin:10px 0; }
+
+    .user-mini {
+      margin-top:auto; padding:14px;
+      background:var(--glass); border:1px solid var(--glass-border);
+      border-radius:14px; display:flex; align-items:center; gap:12px;
+    }
+    .user-mini .avatar {
+      width:38px; height:38px; border-radius:50%;
+      background:linear-gradient(135deg,var(--green-dim),var(--green-bright));
+      display:flex; align-items:center; justify-content:center; font-size:18px;
+      box-shadow:0 0 14px var(--green-glow); flex-shrink:0;
+    }
+    .user-mini .info .name { font-size:0.85rem; font-weight:600; color:var(--text-primary); }
+    .user-mini .info .level { font-size:0.72rem; color:var(--green-core); }
+
+    /* ── MAIN CONTENT ── */
+    .main-content {
+      margin-left:260px;
+      padding:36px 40px;
+      display:flex; flex-direction:column; gap:32px;
+      box-sizing:border-box;
+      width:calc(100% - 260px);
+      min-width:0;
+      overflow-x:hidden;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:16px;
+    }
+    .page-header h1 {
+      font-family:'Syne',sans-serif; font-weight:800;
+      font-size:2rem; letter-spacing:-1px; color:var(--text-primary);
+    }
+    .page-header h1 .accent {
+      background:linear-gradient(90deg,var(--green-core),var(--green-bright));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .header-actions { display:flex; gap:10px; }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:16px; min-width:0;
+    }
+    .stats-row > * { min-width:0; }
+    .stat-card {
+      padding:22px 24px;
+      display:flex; flex-direction:column; gap:4px;
+      position:relative; overflow:hidden;
+      transition:transform 0.25s, box-shadow 0.25s;
+    }
+    .stat-card:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.4); }
+    .stat-card::before {
+      content:''; position:absolute; top:-40px; right:-30px;
+      width:100px; height:100px;
+      background:radial-gradient(circle,rgba(34,197,94,0.12) 0%,transparent 70%);
+      border-radius:50%;
+    }
+    .stat-card .s-label { font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); }
+    .stat-card .s-val  { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; color:var(--green-bright); line-height:1; }
+    .stat-card .s-sub  { font-size:0.75rem; color:var(--text-muted); margin-top:2px; }
+    .stat-card .s-icon { position:absolute; bottom:16px; right:18px; font-size:28px; opacity:0.2; }
+    .stat-card.amber .s-val  { color:var(--amber); }
+    .stat-card.amber::before { background:radial-gradient(circle,rgba(245,158,11,0.12) 0%,transparent 70%); }
+    .stat-card.red   .s-val  { color:var(--red); }
+    .stat-card.red::before   { background:radial-gradient(circle,rgba(239,68,68,0.12) 0%,transparent 70%); }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:0.72rem; font-weight:600; color:var(--green-core);
+      text-transform:uppercase; letter-spacing:2px; margin-bottom:10px;
+    }
+    .section-label::before {
+      content:''; display:block; width:20px; height:2px;
+      background:var(--green-core); border-radius:2px;
+    }
+
+    /* ═══════════════════════════
+       HEATMAP SECTION
+       ═══════════════════════════ */
+    .heatmap-section { display:flex; flex-direction:column; gap:16px; }
+    .heatmap-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    .heatmap-header h2 { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; letter-spacing:-0.5px; }
+
+    .heatmap-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .heatmap-controls .pill-btn {
+      padding:6px 14px; border-radius:20px; font-size:0.78rem; font-weight:500;
+      cursor:pointer; border:1px solid var(--glass-border); background:var(--glass);
+      color:var(--text-secondary); transition:all 0.2s;
+    }
+    .heatmap-controls .pill-btn:hover,
+    .heatmap-controls .pill-btn.active {
+      background:rgba(34,197,94,0.15);
+      border-color:var(--glass-border-bright);
+      color:var(--green-bright);
+    }
+
+    .heatmap-legend {
+      display:flex; align-items:center; gap:8px; font-size:0.75rem; color:var(--text-muted);
+    }
+    .legend-bar {
+      width:140px; height:10px; border-radius:6px;
+      background:linear-gradient(90deg,
+        rgba(34,197,94,0.8),
+        rgba(253,224,71,0.9),
+        rgba(251,146,60,0.9),
+        rgba(239,68,68,1));
+    }
+
+    .heatmap-body {
+      display:grid; grid-template-columns:1fr 300px; gap:20px; min-width:0;
+    }
+    .heatmap-body > * { min-width:0; }
+    .map-container {
+      border-radius:var(--radius); overflow:hidden;
+      border:1px solid var(--glass-border);
+      position:relative; min-height:460px;
+    }
+    #gmap { width:100%; height:100%; min-height:460px; }
+
+    /* Fallback placeholder when Maps API key not set */
+    .map-placeholder {
+      position:absolute; inset:0;
+      background:linear-gradient(145deg,#0a1a10,#0d2218,#061208);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:16px;
+    }
+    .map-placeholder .placeholder-grid {
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(34,197,94,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,197,94,0.06) 1px, transparent 1px);
+      background-size:40px 40px;
+    }
+    .map-placeholder .ph-blobs {
+      position:absolute; inset:0; overflow:hidden;
+    }
+    .map-placeholder .blob {
+      position:absolute; border-radius:50%;
+      filter:blur(30px); animation:blobPulse 4s ease-in-out infinite alternate;
+    }
+    .blob-1 { width:160px;height:160px;background:rgba(239,68,68,0.25);top:20%;left:30%; animation-delay:0s; }
+    .blob-2 { width:120px;height:120px;background:rgba(251,146,60,0.25);top:50%;left:55%; animation-delay:1s; }
+    .blob-3 { width:80px;height:80px;background:rgba(34,197,94,0.3);top:65%;left:20%; animation-delay:2s; }
+    .blob-4 { width:100px;height:100px;background:rgba(253,224,71,0.2);top:30%;left:65%; animation-delay:0.5s; }
+    @keyframes blobPulse {
+      from { transform:scale(1); opacity:0.7; }
+      to   { transform:scale(1.3); opacity:1; }
+    }
+    .map-placeholder .ph-text {
+      position:relative; z-index:2; text-align:center;
+    }
+    .map-placeholder .ph-text p { font-size:0.8rem; color:var(--text-muted); margin-top:8px; max-width:220px; }
+    .ph-key-badge {
+      background:rgba(34,197,94,0.12); border:1px solid var(--glass-border-bright);
+      border-radius:8px; padding:6px 14px;
+      font-family:monospace; font-size:0.75rem; color:var(--green-bright);
+      margin-top:12px; display:inline-block;
+    }
+
+    /* Map sidebar panel */
+    .map-side-panel { display:flex; flex-direction:column; gap:14px; }
+
+    .area-info-card { padding:22px; }
+    .area-info-card .area-name {
+      font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800;
+      color:var(--text-primary); margin-bottom:4px;
+    }
+    .area-info-card .area-score {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:4px 10px; border-radius:20px; font-size:0.72rem; font-weight:700;
+      margin-bottom:14px;
+    }
+    .area-score.danger  { background:rgba(239,68,68,0.15);  color:var(--red);   border:1px solid rgba(239,68,68,0.3); }
+    .area-score.warning { background:rgba(245,158,11,0.15); color:var(--amber); border:1px solid rgba(245,158,11,0.3); }
+    .area-score.safe    { background:rgba(34,197,94,0.15);  color:var(--green-bright); border:1px solid rgba(34,197,94,0.3); }
+    .area-score .dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+    .area-desc { font-size:0.82rem; color:var(--text-muted); line-height:1.7; margin-bottom:16px; }
+
+    .area-stats-mini { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .asm-item {
+      background:rgba(34,197,94,0.06); border:1px solid var(--glass-border);
+      border-radius:10px; padding:10px 12px;
+    }
+    .asm-item .asm-v { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; color:var(--green-bright); }
+    .asm-item .asm-l { font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+    .asm-item.red .asm-v { color:var(--red); }
+    .asm-item.amber .asm-v { color:var(--amber); }
+
+    /* Hotspot list */
+    .hotspot-card { padding:18px; }
+    .hotspot-card h4 { font-family:'Syne',sans-serif; font-size:0.9rem; font-weight:700; margin-bottom:14px; color:var(--text-secondary); }
+    .hotspot-item {
+      display:flex; align-items:center; gap:10px;
+      padding:9px 0; border-bottom:1px solid rgba(34,197,94,0.07);
+    }
+    .hotspot-item:last-child { border-bottom:none; }
+    .hs-rank {
+      font-family:'Syne',sans-serif; font-size:0.75rem; font-weight:800;
+      color:var(--text-muted); width:18px; text-align:center;
+    }
+    .hs-info { flex:1; }
+    .hs-name { font-size:0.8rem; font-weight:500; color:var(--text-primary); }
+    .hs-sub  { font-size:0.68rem; color:var(--text-muted); }
+    .hs-bar-wrap { width:60px; }
+    .hs-bar { height:4px; border-radius:4px; background:rgba(255,255,255,0.08); overflow:hidden; margin-bottom:3px; }
+    .hs-bar-fill { height:100%; border-radius:4px; }
+    .fill-red    { background:var(--red); }
+    .fill-amber  { background:var(--amber); }
+    .fill-green  { background:var(--green-core); }
+    .hs-pct { font-size:0.65rem; color:var(--text-muted); text-align:right; }
+
+    /* Area selector tabs */
+    .area-tabs { display:flex; gap:6px; flex-wrap:wrap; }
+    .area-tab {
+      padding:6px 14px; border-radius:20px; font-size:0.78rem; font-weight:500;
+      cursor:pointer; border:1px solid var(--glass-border); background:var(--glass);
+      color:var(--text-secondary); transition:all 0.2s;
+    }
+    .area-tab:hover,.area-tab.active {
+      background:rgba(34,197,94,0.15);
+      border-color:var(--glass-border-bright);
+      color:var(--green-bright);
+    }
+
+    /* ═══════════════════════════
+       REPORT / IMAGE UPLOAD
+       ═══════════════════════════ */
+    .report-section { display:flex; flex-direction:column; gap:16px; }
+    .report-grid  { display:grid; grid-template-columns:1fr 1fr; gap:20px; min-width:0; }
+    .report-grid > * { min-width:0; }
+
+    .report-card { padding:28px; }
+    .report-card h3 {
+      font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800;
+      margin-bottom:20px; color:var(--text-primary);
+    }
+
+    .upload-zone {
+      border:2px dashed var(--glass-border-bright);
+      border-radius:var(--radius); padding:40px 24px;
+      text-align:center; cursor:pointer; transition:all 0.25s;
+      position:relative; background:rgba(34,197,94,0.03);
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color:var(--green-core);
+      background:rgba(34,197,94,0.07);
+    }
+    .upload-zone input[type=file] {
+      position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+    }
+    .upload-icon { font-size:48px; margin-bottom:14px; display:block; }
+    .upload-zone h4 { font-size:1rem; font-weight:600; color:var(--text-primary); margin-bottom:6px; }
+    .upload-zone p  { font-size:0.78rem; color:var(--text-muted); }
+    .upload-types { display:flex; gap:6px; justify-content:center; margin-top:12px; }
+    .type-pill {
+      padding:3px 10px; border-radius:10px; font-size:0.68rem; font-weight:600;
+      background:rgba(34,197,94,0.1); border:1px solid var(--glass-border);
+      color:var(--green-bright);
+    }
+
+    .upload-preview { display:none; margin-top:16px; position:relative; }
+    .upload-preview img {
+      width:100%; border-radius:12px; max-height:220px; object-fit:cover;
+      border:1px solid var(--glass-border);
+    }
+    .remove-preview {
+      position:absolute; top:8px; right:8px;
+      background:rgba(239,68,68,0.85); border:none; border-radius:50%;
+      width:28px; height:28px; cursor:pointer; color:#fff; font-size:16px;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    /* Form elements */
+    .form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+    .form-group label { font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+    .form-control {
+      background:rgba(34,197,94,0.05); border:1px solid var(--glass-border);
+      border-radius:var(--radius-sm); padding:10px 14px;
+      color:var(--text-primary); font-family:'DM Sans',sans-serif; font-size:0.88rem;
+      transition:all 0.2s; outline:none; width:100%;
+    }
+    .form-control:focus { border-color:var(--green-core); background:rgba(34,197,94,0.08); }
+    .form-control::placeholder { color:var(--text-muted); }
+    textarea.form-control { resize:vertical; min-height:90px; }
+    select.form-control { cursor:pointer; }
+    select.form-control option { background:#0a1610; color:var(--text-primary); }
+
+    .severity-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+    .sev-pill {
+      padding:10px; border-radius:12px; border:1px solid var(--glass-border);
+      background:var(--glass); cursor:pointer; text-align:center;
+      transition:all 0.2s; font-size:0.78rem; font-weight:600; color:var(--text-muted);
+    }
+    .sev-pill .sev-icon { font-size:20px; display:block; margin-bottom:4px; }
+    .sev-pill.low:hover,.sev-pill.low.selected    { border-color:var(--green-core);  background:rgba(34,197,94,0.12);  color:var(--green-bright); }
+    .sev-pill.med:hover,.sev-pill.med.selected    { border-color:var(--amber);       background:rgba(245,158,11,0.12); color:var(--amber); }
+    .sev-pill.high:hover,.sev-pill.high.selected  { border-color:var(--red);         background:rgba(239,68,68,0.12);  color:var(--red); }
+
+    .category-pills { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+    .cat-pill {
+      padding:5px 12px; border-radius:20px; font-size:0.75rem; font-weight:500;
+      border:1px solid var(--glass-border); background:var(--glass);
+      color:var(--text-secondary); cursor:pointer; transition:all 0.2s;
+    }
+    .cat-pill:hover,.cat-pill.active {
+      background:rgba(34,197,94,0.12); border-color:var(--glass-border-bright);
+      color:var(--green-bright);
+    }
+
+    .location-pin {
+      display:flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:10px;
+      background:rgba(34,197,94,0.07); border:1px solid var(--glass-border);
+      font-size:0.8rem; color:var(--text-secondary); margin-bottom:14px; cursor:pointer;
+      transition:all 0.2s;
+    }
+    .location-pin:hover { border-color:var(--green-core); }
+    .location-pin .pin-icon { font-size:18px; }
+    .location-pin .pin-text .pin-addr { color:var(--text-primary); font-weight:500; }
+    .location-pin .pin-text .pin-sub  { font-size:0.7rem; color:var(--text-muted); }
+    .location-pin .detect-btn {
+      margin-left:auto; font-size:0.7rem; color:var(--green-core);
+      font-weight:600; white-space:nowrap;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:11px 24px; border-radius:50px;
+      font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600;
+      cursor:pointer; border:none; transition:all 0.25s; text-decoration:none;
+    }
+    .btn-primary {
+      background:linear-gradient(135deg,var(--green-dim),var(--green-core));
+      color:#fff; box-shadow:0 0 24px var(--green-glow);
+    }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 40px var(--green-glow); }
+    .btn-ghost {
+      background:var(--glass); border:1px solid var(--glass-border-bright);
+      color:var(--text-secondary);
+    }
+    .btn-ghost:hover { border-color:var(--green-core); color:var(--green-bright); }
+    .btn-full { width:100%; justify-content:center; }
+    .btn-danger {
+      background:linear-gradient(135deg,#991b1b,var(--red));
+      color:#fff; box-shadow:0 0 20px rgba(239,68,68,0.25);
+    }
+    .btn-danger:hover { transform:translateY(-2px); box-shadow:0 0 35px rgba(239,68,68,0.4); }
+
+    /* ── Recent feed ── */
+    .feed-card { padding:24px; }
+    .feed-card h3 { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; margin-bottom:18px; }
+    .feed-item {
+      display:flex; gap:14px; padding:14px 0;
+      border-bottom:1px solid rgba(34,197,94,0.07); align-items:flex-start;
+    }
+    .feed-item:last-child { border-bottom:none; }
+    .feed-thumb {
+      width:60px; height:60px; border-radius:10px; object-fit:cover; flex-shrink:0;
+      background:rgba(34,197,94,0.1); border:1px solid var(--glass-border);
+      display:flex; align-items:center; justify-content:center; font-size:24px;
+    }
+    .feed-info { flex:1; }
+    .feed-info .fi-title { font-size:0.85rem; font-weight:600; color:var(--text-primary); margin-bottom:3px; }
+    .feed-info .fi-meta  { font-size:0.72rem; color:var(--text-muted); margin-bottom:6px; }
+    .feed-status {
+      display:inline-flex; align-items:center; gap:4px;
+      font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:10px;
+    }
+    .status-pending  { background:rgba(245,158,11,0.15); color:var(--amber); }
+    .status-resolved { background:rgba(34,197,94,0.15);  color:var(--green-bright); }
+    .status-reviewing{ background:rgba(96,165,250,0.15); color:#60a5fa; }
+
+    /* ═══════════════════════════
+       VOLUNTEER SIGNUP
+       ═══════════════════════════ */
+    .volunteer-section { display:flex; flex-direction:column; gap:16px; }
+    .vol-hero {
+      padding:48px; position:relative; overflow:hidden;
+      background:linear-gradient(135deg,rgba(10,28,18,0.8),rgba(16,42,26,0.6));
+      border:1px solid var(--glass-border-bright);
+    }
+    .vol-hero::before {
+      content:''; position:absolute; top:-80px; right:-80px;
+      width:300px; height:300px;
+      background:radial-gradient(circle,rgba(34,197,94,0.12) 0%,transparent 70%);
+      border-radius:50%;
+    }
+    .vol-hero::after {
+      content:''; position:absolute; bottom:-60px; left:-60px;
+      width:200px; height:200px;
+      background:radial-gradient(circle,rgba(74,222,128,0.08) 0%,transparent 70%);
+      border-radius:50%;
+    }
+    .vol-hero .vh-inner { position:relative; z-index:2; max-width:600px; }
+    .vol-hero h2 { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; letter-spacing:-1px; margin-bottom:12px; }
+    .vol-hero p  { color:var(--text-muted); line-height:1.7; font-size:0.92rem; margin-bottom:24px; }
+    .vol-perks { display:flex; gap:12px; flex-wrap:wrap; }
+    .vol-perk {
+      display:flex; align-items:center; gap:6px;
+      background:rgba(34,197,94,0.1); border:1px solid var(--glass-border);
+      border-radius:20px; padding:6px 14px; font-size:0.78rem; color:var(--text-secondary);
+    }
+    .vol-perk .perk-icon { font-size:16px; }
+
+    .vol-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; min-width:0; }
+    .vol-grid > * { min-width:0; }
+    .vol-form-card { padding:32px; }
+    .vol-form-card h3 {
+      font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800;
+      margin-bottom:24px; color:var(--text-primary);
+    }
+
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+    .interests-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:14px; }
+    .interest-item {
+      display:flex; align-items:center; gap:8px; padding:10px 12px;
+      border-radius:10px; border:1px solid var(--glass-border);
+      background:rgba(34,197,94,0.04); cursor:pointer; transition:all 0.2s;
+    }
+    .interest-item:hover { border-color:var(--glass-border-bright); background:rgba(34,197,94,0.08); }
+    .interest-item input { accent-color:var(--green-core); }
+    .interest-item label { font-size:0.8rem; color:var(--text-secondary); cursor:pointer; }
+
+    .availability-row { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:14px; }
+    .day-btn {
+      padding:8px 4px; border-radius:8px; text-align:center;
+      border:1px solid var(--glass-border); background:var(--glass);
+      cursor:pointer; transition:all 0.2s; font-size:0.7rem; color:var(--text-muted);
+    }
+    .day-btn:hover,.day-btn.active {
+      background:rgba(34,197,94,0.15); border-color:var(--glass-border-bright);
+      color:var(--green-bright); font-weight:600;
+    }
+
+    /* Volunteer leaderboard */
+    .vol-leaderboard { padding:28px; }
+    .vol-leaderboard h3 {
+      font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800;
+      margin-bottom:20px; color:var(--text-primary);
+    }
+    .lb-item {
+      display:flex; align-items:center; gap:12px;
+      padding:12px 0; border-bottom:1px solid rgba(34,197,94,0.07);
+    }
+    .lb-item:last-child { border-bottom:none; }
+    .lb-rank {
+      font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800;
+      color:var(--text-muted); width:24px; text-align:center;
+    }
+    .lb-rank.gold   { color:#f59e0b; }
+    .lb-rank.silver { color:#94a3b8; }
+    .lb-rank.bronze { color:#b45309; }
+    .lb-avatar {
+      width:38px; height:38px; border-radius:50%;
+      background:linear-gradient(135deg,var(--green-dim),var(--green-bright));
+      display:flex; align-items:center; justify-content:center; font-size:18px;
+      box-shadow:0 0 10px var(--green-glow); flex-shrink:0;
+    }
+    .lb-info { flex:1; }
+    .lb-name { font-size:0.85rem; font-weight:600; color:var(--text-primary); }
+    .lb-area { font-size:0.7rem; color:var(--text-muted); }
+    .lb-xp {
+      font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800; color:var(--green-bright);
+    }
+
+    /* ── UPCOMING DRIVES ── */
+    .drives-card { padding:24px; }
+    .drives-card h3 { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; margin-bottom:16px; }
+    .drive-item {
+      display:grid; grid-template-columns:50px 1fr auto; gap:12px;
+      align-items:center; padding:12px 0; border-bottom:1px solid rgba(34,197,94,0.07);
+    }
+    .drive-item:last-child { border-bottom:none; }
+    .drive-date {
+      background:rgba(34,197,94,0.1); border:1px solid var(--glass-border);
+      border-radius:10px; padding:8px 6px; text-align:center;
+    }
+    .drive-date .dd-day { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; color:var(--green-bright); line-height:1; }
+    .drive-date .dd-mon { font-size:0.6rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; }
+    .drive-info .di-title { font-size:0.85rem; font-weight:600; color:var(--text-primary); }
+    .drive-info .di-meta  { font-size:0.7rem; color:var(--text-muted); margin-top:2px; }
+    .join-btn {
+      padding:6px 14px; border-radius:20px; font-size:0.73rem; font-weight:600;
+      cursor:pointer; border:1px solid var(--glass-border-bright);
+      background:rgba(34,197,94,0.1); color:var(--green-bright); transition:all 0.2s;
+    }
+    .join-btn:hover { background:rgba(34,197,94,0.2); transform:translateY(-1px); }
+    .join-btn.joined {
+      background:rgba(34,197,94,0.2); border-color:var(--green-core);
+    }
+
+    /* ── TOAST ── */
+    #toast-container {
+      position:fixed; bottom:28px; right:28px; z-index:9999;
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .toast {
+      background:rgba(10,28,18,0.95); backdrop-filter:blur(16px);
+      border:1px solid var(--glass-border); border-radius:12px;
+      padding:12px 18px; min-width:260px; max-width:340px;
+      display:flex; align-items:center; gap:10px;
+      font-size:0.83rem; color:var(--text-primary);
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+      animation:slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity:0; transform:translateX(30px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+    .toast-icon { font-size:16px; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeSlideUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .anim-in { animation:fadeSlideUp 0.6s ease both; }
+    .anim-in:nth-child(1) { animation-delay:0.05s; }
+    .anim-in:nth-child(2) { animation-delay:0.1s; }
+    .anim-in:nth-child(3) { animation-delay:0.15s; }
+    .anim-in:nth-child(4) { animation-delay:0.2s; }
+
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.5; transform:scale(1.4); }
+    }
+    .live-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:var(--green-core); animation:pulse 2s infinite; display:inline-block;
+    }
+
+    /* ── SUCCESS STATE ── */
+    .success-card {
+      display:none; padding:32px; text-align:center;
+    }
+    .success-card .s-emoji { font-size:56px; margin-bottom:16px; display:block; }
+    .success-card h3 { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; margin-bottom:8px; }
+    .success-card p  { color:var(--text-muted); font-size:0.88rem; margin-bottom:20px; }
+    .tracking-id {
+      font-family:monospace; font-size:0.85rem; color:var(--green-bright);
+      background:rgba(34,197,94,0.1); border:1px solid var(--glass-border);
+      padding:8px 16px; border-radius:8px; display:inline-block; letter-spacing:1px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:1100px) {
+      .stats-row { grid-template-columns:1fr 1fr; }
+      .heatmap-body { grid-template-columns:1fr; }
+    }
+    @media (max-width:900px) {
+      .sidebar { display:none; }
+      .main-content { margin-left:0; width:100%; padding:24px 16px; }
+      .stats-row { grid-template-columns:1fr 1fr; }
+      .report-grid  { grid-template-columns:1fr; }
+      .vol-grid     { grid-template-columns:1fr; }
+      .form-row     { grid-template-columns:1fr; }
+    }
+    @media (max-width:500px) {
+      .stats-row { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ NAV ══════════ -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="leaf">🌿</div>
+    EcoSense
+  </a>
+  <div class="nav-links">
+    <a href="#heatmap" class="active">Heatmap</a>
+    <a href="#report">Report</a>
+    <a href="#volunteer">Volunteer</a>
+    <a href="#" class="nav-btn btn">🔔 3 Alerts</a>
+  </div>
+</nav>
+
+<!-- ══════════ PAGE WRAP ══════════ -->
+<div class="page-wrap">
+  <div class="dashboard-shell">
+
+    <!-- ══════════ SIDEBAR ══════════ -->
+    <aside class="sidebar">
+      <div class="sidebar-section-label">Overview</div>
+
+      <a class="sidebar-item active" href="#heatmap" onclick="scrollTo('#heatmap')">
+        <div class="icon">🗺️</div>
+        Community Heatmap
+      </a>
+      <a class="sidebar-item" href="#report">
+        <div class="icon">📸</div>
+        Report Waste
+        <span class="sidebar-badge">3</span>
+      </a>
+      <a class="sidebar-item" href="#volunteer">
+        <div class="icon">🙋</div>
+        Volunteer Signup
+        <span class="sidebar-badge green">New</span>
+      </a>
+
+      <div class="sidebar-section-label">Community</div>
+      <a class="sidebar-item" href="#">
+        <div class="icon">📊</div>
+        Area Statistics
+      </a>
+      <a class="sidebar-item" href="#">
+        <div class="icon">🏆</div>
+        Leaderboard
+      </a>
+      <a class="sidebar-item" href="#">
+        <div class="icon">📅</div>
+        Upcoming Drives
+      </a>
+
+      <div class="sidebar-section-label">Account</div>
+      <a class="sidebar-item" href="#">
+        <div class="icon">⚙️</div>
+        Settings
+      </a>
+
+      <div class="sidebar-divider"></div>
+      <div class="user-mini">
+        <div class="avatar">🌿</div>
+        <div class="info">
+          <div class="name">EcoWarrior</div>
+          <div class="level">🏅 Level 7 · 2,340 XP</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ══════════ MAIN ══════════ -->
+    <main class="main-content">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header anim-in">
+        <div>
+          <h1>Citizen <span class="accent">Dashboard</span></h1>
+          <p style="color:var(--text-muted);font-size:0.85rem;margin-top:4px;">
+            <span class="live-dot"></span>&nbsp; Live data · Bengaluru, KA
+          </p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="showToast('📡 Data refreshed!','success')">↻ Refresh</button>
+          <button class="btn btn-primary" onclick="document.getElementById('report').scrollIntoView({behavior:'smooth'})">
+            + Report Waste
+          </button>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="glass stat-card anim-in">
+          <div class="s-label">Total Reports</div>
+          <div class="s-val" id="ctr-reports">1,284</div>
+          <div class="s-sub">↑ 47 this week</div>
+          <div class="s-icon">📍</div>
+        </div>
+        <div class="glass stat-card amber anim-in">
+          <div class="s-label">Pending Cleanup</div>
+          <div class="s-val">312</div>
+          <div class="s-sub">32 critical zones</div>
+          <div class="s-icon">⏳</div>
+        </div>
+        <div class="glass stat-card anim-in">
+          <div class="s-label">Resolved (30d)</div>
+          <div class="s-val">891</div>
+          <div class="s-sub">↑ 12% vs last month</div>
+          <div class="s-icon">✅</div>
+        </div>
+        <div class="glass stat-card red anim-in">
+          <div class="s-label">Critical Hotspots</div>
+          <div class="s-val">18</div>
+          <div class="s-sub">Requires urgent action</div>
+          <div class="s-icon">🚨</div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════
+           SECTION 1 – HEATMAP
+           ════════════════════════════ -->
+      <section class="heatmap-section" id="heatmap">
+        <div class="heatmap-header">
+          <div>
+            <div class="section-label">Live Intelligence</div>
+            <h2>Community Waste Heatmap</h2>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;">
+            <div class="heatmap-controls">
+              <button class="pill-btn active" onclick="setPeriod(this,'Today')">Today</button>
+              <button class="pill-btn" onclick="setPeriod(this,'7 Days')">7 Days</button>
+              <button class="pill-btn" onclick="setPeriod(this,'30 Days')">30 Days</button>
+              <button class="pill-btn" onclick="setPeriod(this,'All Time')">All Time</button>
+            </div>
+            <div class="heatmap-legend">
+              <span>Low</span>
+              <div class="legend-bar"></div>
+              <span>High</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Area selector -->
+        <div class="area-tabs">
+          <button class="area-tab active" onclick="setArea(this,'Koramangala')">Koramangala</button>
+          <button class="area-tab" onclick="setArea(this,'Indiranagar')">Indiranagar</button>
+          <button class="area-tab" onclick="setArea(this,'Whitefield')">Whitefield</button>
+          <button class="area-tab" onclick="setArea(this,'BTM Layout')">BTM Layout</button>
+          <button class="area-tab" onclick="setArea(this,'HSR Layout')">HSR Layout</button>
+          <button class="area-tab" onclick="setArea(this,'Jayanagar')">Jayanagar</button>
+        </div>
+
+        <div class="heatmap-body">
+          <!-- MAP -->
+          <div class="map-container">
+            <div id="gmap"></div>
+            <!-- Shown only when Google Maps fails to load -->
+            <div class="map-placeholder" id="map-placeholder" style="display:none;">
+              <div class="placeholder-grid"></div>
+              <div class="ph-blobs">
+                <div class="blob blob-1"></div>
+                <div class="blob blob-2"></div>
+                <div class="blob blob-3"></div>
+                <div class="blob blob-4"></div>
+              </div>
+              <div class="ph-text">
+                <div style="font-size:40px;margin-bottom:10px;">🗺️</div>
+                <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--text-primary);">
+                  Google Maps Heatmap
+                </div>
+                <p>Add your Maps API key to enable live waste density visualization</p>
+                <div class="ph-key-badge">YOUR_API_KEY → Maps JS API</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SIDE PANEL -->
+          <div class="map-side-panel">
+
+            <!-- Area Description -->
+            <div class="glass area-info-card" id="area-card">
+              <div class="area-name" id="area-name">Koramangala</div>
+              <div class="area-score danger" id="area-score">
+                <span class="dot"></span>
+                High Risk · Score 82/100
+              </div>
+              <p class="area-desc" id="area-desc">
+                Koramangala is a densely populated residential and commercial hub with significant waste management challenges. Street markets, restaurant clusters, and high pedestrian density contribute to elevated waste accumulation, particularly along the 5th Block Main Road and 80 Feet Road corridors.
+              </p>
+              <div class="area-stats-mini">
+                <div class="asm-item red">
+                  <div class="asm-v">148</div>
+                  <div class="asm-l">Open Reports</div>
+                </div>
+                <div class="asm-item amber">
+                  <div class="asm-v">23</div>
+                  <div class="asm-l">Hotspots</div>
+                </div>
+                <div class="asm-item">
+                  <div class="asm-v">89</div>
+                  <div class="asm-l">Resolved (30d)</div>
+                </div>
+                <div class="asm-item">
+                  <div class="asm-v">34</div>
+                  <div class="asm-l">Volunteers</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hotspots -->
+            <div class="glass hotspot-card">
+              <h4>🔥 Top Hotspots</h4>
+              <div class="hotspot-item">
+                <div class="hs-rank">1</div>
+                <div class="hs-info">
+                  <div class="hs-name">5th Block Main Road</div>
+                  <div class="hs-sub">28 active reports</div>
+                </div>
+                <div class="hs-bar-wrap">
+                  <div class="hs-bar"><div class="hs-bar-fill fill-red" style="width:95%"></div></div>
+                  <div class="hs-pct">Critical</div>
+                </div>
+              </div>
+              <div class="hotspot-item">
+                <div class="hs-rank">2</div>
+                <div class="hs-info">
+                  <div class="hs-name">80 Feet Road Market</div>
+                  <div class="hs-sub">21 active reports</div>
+                </div>
+                <div class="hs-bar-wrap">
+                  <div class="hs-bar"><div class="hs-bar-fill fill-red" style="width:82%"></div></div>
+                  <div class="hs-pct">High</div>
+                </div>
+              </div>
+              <div class="hotspot-item">
+                <div class="hs-rank">3</div>
+                <div class="hs-info">
+                  <div class="hs-name">Forum Mall Junction</div>
+                  <div class="hs-sub">14 active reports</div>
+                </div>
+                <div class="hs-bar-wrap">
+                  <div class="hs-bar"><div class="hs-bar-fill fill-amber" style="width:60%"></div></div>
+                  <div class="hs-pct">Moderate</div>
+                </div>
+              </div>
+              <div class="hotspot-item">
+                <div class="hs-rank">4</div>
+                <div class="hs-info">
+                  <div class="hs-name">Sony World Signal</div>
+                  <div class="hs-sub">8 active reports</div>
+                </div>
+                <div class="hs-bar-wrap">
+                  <div class="hs-bar"><div class="hs-bar-fill fill-amber" style="width:40%"></div></div>
+                  <div class="hs-pct">Low</div>
+                </div>
+              </div>
+              <div class="hotspot-item">
+                <div class="hs-rank">5</div>
+                <div class="hs-info">
+                  <div class="hs-name">Jyoti Nivas College Rd</div>
+                  <div class="hs-sub">4 active reports</div>
+                </div>
+                <div class="hs-bar-wrap">
+                  <div class="hs-bar"><div class="hs-bar-fill fill-green" style="width:20%"></div></div>
+                  <div class="hs-pct">Minimal</div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /map-side-panel -->
+        </div><!-- /heatmap-body -->
+      </section>
+
+      <!-- ════════════════════════════
+           SECTION 2 – REPORT WASTE
+           ════════════════════════════ -->
+      <section class="report-section" id="report">
+        <div>
+          <div class="section-label">Citizen Action</div>
+          <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;letter-spacing:-0.5px;">
+            Report a Waste Issue
+          </h2>
+        </div>
+
+        <div class="report-grid">
+          <!-- Upload Card -->
+          <div class="glass report-card">
+            <h3>📸 Upload Evidence</h3>
+
+            <!-- Drop Zone -->
+            <div class="upload-zone" id="upload-zone"
+                 ondragover="event.preventDefault();this.classList.add('drag-over')"
+                 ondragleave="this.classList.remove('drag-over')"
+                 ondrop="handleDrop(event)">
+              <input type="file" id="file-input" accept="image/*" multiple onchange="handleFileSelect(event)" />
+              <span class="upload-icon">🖼️</span>
+              <h4>Drop photos here or click to browse</h4>
+              <p>Capture the waste site clearly — multiple angles help authorities respond faster.</p>
+              <div class="upload-types">
+                <span class="type-pill">JPG</span>
+                <span class="type-pill">PNG</span>
+                <span class="type-pill">HEIC</span>
+                <span class="type-pill">WebP</span>
+              </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="upload-preview" id="upload-preview">
+              <img id="preview-img" src="" alt="Preview" />
+              <button class="remove-preview" onclick="removePreview()">✕</button>
+            </div>
+
+            <!-- Multi-preview grid -->
+            <div id="preview-grid" style="display:none;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;"></div>
+
+            <!-- Location Pin -->
+            <div class="location-pin" onclick="detectLocation()">
+              <span class="pin-icon">📍</span>
+              <div class="pin-text">
+                <div class="pin-addr" id="pin-addr">Tap to set location</div>
+                <div class="pin-sub" id="pin-sub">GPS or type your address</div>
+              </div>
+              <span class="detect-btn" id="detect-btn">Detect →</span>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="report-desc" class="form-control" rows="3"
+                placeholder="Describe what you see — type of waste, approximate quantity, any smell or hazard..."></textarea>
+            </div>
+
+            <!-- Category -->
+            <label style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;display:block;margin-bottom:8px;">
+              Waste Category
+            </label>
+            <div class="category-pills" id="cat-pills">
+              <button class="cat-pill" onclick="selectCat(this)">🗑️ Household</button>
+              <button class="cat-pill" onclick="selectCat(this)">🏗️ Construction</button>
+              <button class="cat-pill" onclick="selectCat(this)">🍔 Food Waste</button>
+              <button class="cat-pill" onclick="selectCat(this)">🧪 Hazardous</button>
+              <button class="cat-pill" onclick="selectCat(this)">🛢️ Industrial</button>
+              <button class="cat-pill" onclick="selectCat(this)">🔋 E-Waste</button>
+              <button class="cat-pill" onclick="selectCat(this)">🌊 Sewage</button>
+              <button class="cat-pill" onclick="selectCat(this)">Other</button>
+            </div>
+          </div>
+
+          <!-- Form Card -->
+          <div class="glass report-card" id="report-form-wrap">
+            <h3>📋 Report Details</h3>
+
+            <!-- Severity -->
+            <label style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;display:block;margin-bottom:8px;">
+              Severity Level
+            </label>
+            <div class="severity-row">
+              <div class="sev-pill low" onclick="selectSev(this,'low')">
+                <span class="sev-icon">🟢</span>Low
+              </div>
+              <div class="sev-pill med" onclick="selectSev(this,'med')">
+                <span class="sev-icon">🟡</span>Moderate
+              </div>
+              <div class="sev-pill high" onclick="selectSev(this,'high')">
+                <span class="sev-icon">🔴</span>Critical
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Landmark / Address</label>
+              <input type="text" class="form-control" id="report-address"
+                placeholder="e.g. Near Jyoti Nivas College, Koramangala" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Your Name (optional)</label>
+                <input type="text" class="form-control" placeholder="Remain anonymous?" />
+              </div>
+              <div class="form-group">
+                <label>Contact (optional)</label>
+                <input type="text" class="form-control" placeholder="Phone / email" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Area / Locality</label>
+              <select class="form-control" id="report-area">
+                <option value="">Select area</option>
+                <option>Koramangala</option>
+                <option>Indiranagar</option>
+                <option>Whitefield</option>
+                <option>BTM Layout</option>
+                <option>HSR Layout</option>
+                <option>Jayanagar</option>
+                <option>MG Road</option>
+                <option>Electronic City</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Additional Notes</label>
+              <textarea class="form-control" rows="3"
+                placeholder="Has this been reported before? Any authority already contacted?"></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-primary btn-full" onclick="submitReport()" style="flex:1;">
+                🚀 Submit Report
+              </button>
+              <button class="btn btn-ghost" onclick="clearForm()" style="padding:11px 18px;">
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success Card (hidden by default) -->
+        <div class="glass success-card" id="success-card">
+          <span class="s-emoji">🎉</span>
+          <h3>Report Submitted!</h3>
+          <p>Thank you for making your community cleaner. Authorities have been notified and volunteers in your area will be alerted.</p>
+          <div class="tracking-id" id="tracking-id">RPT-2025-0001</div>
+          <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="resetReport()">+ Report Another</button>
+            <button class="btn btn-ghost" onclick="showToast('📤 Link copied!','success')">🔗 Share Report</button>
+          </div>
+        </div>
+
+        <!-- Recent Reports Feed -->
+        <div class="glass feed-card">
+          <h3>🕐 Recent Community Reports</h3>
+          <div class="feed-item">
+            <div class="feed-thumb">🗑️</div>
+            <div class="feed-info">
+              <div class="fi-title">Overflowing bins near 5th Block Market</div>
+              <div class="fi-meta">📍 Koramangala · 18 min ago · Household Waste</div>
+              <span class="feed-status status-pending">⏳ Pending</span>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-thumb">🧪</div>
+            <div class="feed-info">
+              <div class="fi-title">Chemical dumping near storm drain</div>
+              <div class="fi-meta">📍 Whitefield · 1 hr ago · Hazardous</div>
+              <span class="feed-status status-reviewing">🔍 Under Review</span>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-thumb">🏗️</div>
+            <div class="feed-info">
+              <div class="fi-title">Construction debris blocking footpath</div>
+              <div class="fi-meta">📍 Indiranagar · 3 hr ago · Construction</div>
+              <span class="feed-status status-resolved">✅ Resolved</span>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-thumb">🍔</div>
+            <div class="feed-info">
+              <div class="fi-title">Food waste accumulation near restaurant row</div>
+              <div class="fi-meta">📍 BTM Layout · 5 hr ago · Food Waste</div>
+              <span class="feed-status status-pending">⏳ Pending</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════
+           SECTION 3 – VOLUNTEER SIGNUP
+           ════════════════════════════ -->
+      <section class="volunteer-section" id="volunteer">
+        <!-- Hero Banner -->
+        <div class="glass vol-hero" style="border-radius:var(--radius);">
+          <div class="vh-inner">
+            <div class="section-label">Join the Movement</div>
+            <h2>Become an <span style="color:var(--green-bright)">EcoWarrior</span></h2>
+            <p>Join 4,800+ active volunteers across Bengaluru working to keep our city clean. Every cleanup drive, every report, every hour you give — it all counts toward a healthier city.</p>
+            <div class="vol-perks">
+              <div class="vol-perk"><span class="perk-icon">🏅</span> Earn XP & Badges</div>
+              <div class="vol-perk"><span class="perk-icon">📜</span> Volunteer Certificate</div>
+              <div class="vol-perk"><span class="perk-icon">🌍</span> Real Impact</div>
+              <div class="vol-perk"><span class="perk-icon">🤝</span> Community Network</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="vol-grid">
+          <!-- Signup Form -->
+          <div class="glass vol-form-card" id="vol-form-wrap">
+            <h3>🙋 Volunteer Registration</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>First Name</label>
+                <input type="text" class="form-control" id="vol-fname" placeholder="Priya" />
+              </div>
+              <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" class="form-control" id="vol-lname" placeholder="Sharma" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" class="form-control" id="vol-email" placeholder="priya@example.com" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" class="form-control" id="vol-phone" placeholder="+91 9876543210" />
+              </div>
+              <div class="form-group">
+                <label>Your Area</label>
+                <select class="form-control" id="vol-area">
+                  <option value="">Select locality</option>
+                  <option>Koramangala</option>
+                  <option>Indiranagar</option>
+                  <option>Whitefield</option>
+                  <option>BTM Layout</option>
+                  <option>HSR Layout</option>
+                  <option>Jayanagar</option>
+                  <option>MG Road</option>
+                  <option>Electronic City</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Volunteer Role</label>
+              <select class="form-control" id="vol-role">
+                <option value="">Select your role</option>
+                <option>Field Volunteer (Cleanup Drives)</option>
+                <option>Waste Inspector (Reporting)</option>
+                <option>Community Educator</option>
+                <option>Event Organiser</option>
+                <option>Digital Volunteer (Social Media)</option>
+                <option>Data Analyst</option>
+              </select>
+            </div>
+
+            <label style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;display:block;margin-bottom:8px;">
+              Areas of Interest
+            </label>
+            <div class="interests-grid">
+              <div class="interest-item">
+                <input type="checkbox" id="i1" />
+                <label for="i1">🧹 Cleanup Drives</label>
+              </div>
+              <div class="interest-item">
+                <input type="checkbox" id="i2" />
+                <label for="i2">🌱 Composting</label>
+              </div>
+              <div class="interest-item">
+                <input type="checkbox" id="i3" />
+                <label for="i3">♻️ Recycling Awareness</label>
+              </div>
+              <div class="interest-item">
+                <input type="checkbox" id="i4" />
+                <label for="i4">📊 Data Collection</label>
+              </div>
+              <div class="interest-item">
+                <input type="checkbox" id="i5" />
+                <label for="i5">📣 Awareness Campaigns</label>
+              </div>
+              <div class="interest-item">
+                <input type="checkbox" id="i6" />
+                <label for="i6">🏫 School Programmes</label>
+              </div>
+            </div>
+
+            <label style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;display:block;margin-bottom:8px;">
+              Weekly Availability
+            </label>
+            <div class="availability-row" id="day-row">
+              <div class="day-btn" onclick="toggleDay(this)">Mon</div>
+              <div class="day-btn" onclick="toggleDay(this)">Tue</div>
+              <div class="day-btn" onclick="toggleDay(this)">Wed</div>
+              <div class="day-btn" onclick="toggleDay(this)">Thu</div>
+              <div class="day-btn" onclick="toggleDay(this)">Fri</div>
+              <div class="day-btn" onclick="toggleDay(this)">Sat</div>
+              <div class="day-btn" onclick="toggleDay(this)">Sun</div>
+            </div>
+
+            <div class="form-group">
+              <label>Why do you want to volunteer? (optional)</label>
+              <textarea class="form-control" rows="2" id="vol-why"
+                placeholder="Your motivation helps us match you with the right team..."></textarea>
+            </div>
+
+            <button class="btn btn-primary btn-full" onclick="submitVolunteer()">
+              🌿 Register as Volunteer
+            </button>
+          </div>
+
+          <!-- Success (volunteer) -->
+          <div class="glass success-card" id="vol-success" style="border-radius:var(--radius);">
+            <span class="s-emoji">🌿</span>
+            <h3>Welcome, EcoWarrior!</h3>
+            <p>You're officially part of the EcoSense volunteer community. Check your email for the next cleanup drive invitation in your area.</p>
+            <div class="tracking-id" id="vol-id">VOL-2025-0001</div>
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="resetVol()">Register Another</button>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <!-- Leaderboard -->
+            <div class="glass vol-leaderboard">
+              <h3>🏆 Top Volunteers — May 2025</h3>
+              <div class="lb-item">
+                <div class="lb-rank gold">🥇</div>
+                <div class="lb-avatar">🌿</div>
+                <div class="lb-info"><div class="lb-name">Priya Menon</div><div class="lb-area">Koramangala</div></div>
+                <div class="lb-xp">4,820 XP</div>
+              </div>
+              <div class="lb-item">
+                <div class="lb-rank silver">🥈</div>
+                <div class="lb-avatar">🌱</div>
+                <div class="lb-info"><div class="lb-name">Arjun Rao</div><div class="lb-area">Indiranagar</div></div>
+                <div class="lb-xp">4,410 XP</div>
+              </div>
+              <div class="lb-item">
+                <div class="lb-rank bronze">🥉</div>
+                <div class="lb-avatar">♻️</div>
+                <div class="lb-info"><div class="lb-name">Sneha Patel</div><div class="lb-area">HSR Layout</div></div>
+                <div class="lb-xp">3,980 XP</div>
+              </div>
+              <div class="lb-item">
+                <div class="lb-rank">4</div>
+                <div class="lb-avatar">🍃</div>
+                <div class="lb-info"><div class="lb-name">Kiran Sharma</div><div class="lb-area">Whitefield</div></div>
+                <div class="lb-xp">3,640 XP</div>
+              </div>
+              <div class="lb-item">
+                <div class="lb-rank">5</div>
+                <div class="lb-avatar">🌍</div>
+                <div class="lb-info"><div class="lb-name">Lakshmi Nair</div><div class="lb-area">BTM Layout</div></div>
+                <div class="lb-xp">3,290 XP</div>
+              </div>
+            </div>
+
+            <!-- Upcoming Drives -->
+            <div class="glass drives-card">
+              <h3>📅 Upcoming Cleanup Drives</h3>
+              <div class="drive-item">
+                <div class="drive-date"><div class="dd-day">03</div><div class="dd-mon">Jun</div></div>
+                <div class="drive-info">
+                  <div class="di-title">Koramangala Weekend Clean</div>
+                  <div class="di-meta">🕗 7:00 AM · 5th Block Park · 42 signed up</div>
+                </div>
+                <button class="join-btn" onclick="joinDrive(this)">Join</button>
+              </div>
+              <div class="drive-item">
+                <div class="drive-date"><div class="dd-day">08</div><div class="dd-mon">Jun</div></div>
+                <div class="drive-info">
+                  <div class="di-title">Indiranagar Canal Drive</div>
+                  <div class="di-meta">🕗 6:30 AM · 100 Feet Rd · 28 signed up</div>
+                </div>
+                <button class="join-btn" onclick="joinDrive(this)">Join</button>
+              </div>
+              <div class="drive-item">
+                <div class="drive-date"><div class="dd-day">15</div><div class="dd-mon">Jun</div></div>
+                <div class="drive-info">
+                  <div class="di-title">Whitefield Lake Cleanup</div>
+                  <div class="di-meta">🕗 8:00 AM · ITPL Lake · 61 signed up</div>
+                </div>
+                <button class="join-btn joined" onclick="joinDrive(this)">✓ Joined</button>
+              </div>
+              <div class="drive-item">
+                <div class="drive-date"><div class="dd-day">22</div><div class="dd-mon">Jun</div></div>
+                <div class="drive-info">
+                  <div class="di-title">BTM Layout Mega Drive</div>
+                  <div class="di-meta">🕗 7:30 AM · BTM Lake · 17 signed up</div>
+                </div>
+                <button class="join-btn" onclick="joinDrive(this)">Join</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div style="height:40px;"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ══════════ TOAST ══════════ -->
+<div id="toast-container"></div>
+
+<script>
+  // ── DATA for area cards ──
+  const areaData = {
+    'Koramangala': {
+      score:'High Risk · Score 82/100', cls:'danger',
+      desc:'Koramangala is a densely populated residential and commercial hub with significant waste management challenges. Street markets, restaurant clusters, and high pedestrian density contribute to elevated waste accumulation, particularly along the 5th Block Main Road and 80 Feet Road corridors.',
+      open:148, spots:23, resolved:89, vols:34
+    },
+    'Indiranagar': {
+      score:'Moderate Risk · Score 61/100', cls:'warning',
+      desc:'Indiranagar\'s vibrant café and pub district sees heavy weekend footfall. While the BBMP collection service is regular on 100 Feet Road, the residential lanes and canal banks near 12th Main accumulate litter due to inadequate public bins and festival overflow.',
+      open:92, spots:14, resolved:120, vols:47
+    },
+    'Whitefield': {
+      score:'High Risk · Score 75/100', cls:'danger',
+      desc:'Whitefield, a major IT corridor, faces dual pressures from construction debris from ongoing metro and residential projects, and sewage overflow near Varthur Lake. The lake\'s condition remains a persistent environmental concern despite multiple civic interventions.',
+      open:118, spots:19, resolved:74, vols:29
+    },
+    'BTM Layout': {
+      score:'Low Risk · Score 34/100', cls:'safe',
+      desc:'BTM Layout has seen marked improvement following the 2024 Citizen Clean Campaign. Active resident welfare associations, functional composting units at the BTM Lake, and dedicated volunteer teams have significantly reduced open dumping in the area.',
+      open:41, spots:6, resolved:203, vols:82
+    },
+    'HSR Layout': {
+      score:'Low Risk · Score 28/100', cls:'safe',
+      desc:'HSR Layout ranks among Bengaluru\'s cleanest residential zones. Sector-wise waste segregation, an active eco-group at Agara Lake, and strong enforcement of anti-littering bylaws contribute to consistently low waste accumulation scores.',
+      open:29, spots:4, resolved:189, vols:96
+    },
+    'Jayanagar': {
+      score:'Moderate Risk · Score 55/100', cls:'warning',
+      desc:'Jayanagar\'s busy shopping complex and JP Park vicinity attract weekend crowds that generate substantial litter. Waste segregation compliance is around 60%, and bin saturation is common on market days — particularly on 11th Main Road and Ashoka Pillar junction.',
+      open:78, spots:10, resolved:142, vols:53
+    }
+  };
+
+  function setArea(el, name) {
+    document.querySelectorAll('.area-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const d = areaData[name];
+    if (!d) return;
+    document.getElementById('area-name').textContent = name;
+    const sc = document.getElementById('area-score');
+    sc.textContent = ''; // clear
+    const dot = document.createElement('span'); dot.className='dot';
+    sc.appendChild(dot); sc.append(' '+d.score);
+    sc.className = 'area-score ' + d.cls;
+    document.getElementById('area-desc').textContent = d.desc;
+    const amis = document.querySelectorAll('.asm-item .asm-v');
+    if (amis.length >= 4) {
+      amis[0].textContent = d.open;
+      amis[1].textContent = d.spots;
+      amis[2].textContent = d.resolved;
+      amis[3].textContent = d.vols;
+    }
+    showToast('🗺️ Switched to ' + name, 'info');
+  }
+
+  function setPeriod(el, period) {
+    document.querySelectorAll('.heatmap-controls .pill-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    showToast('📊 Showing data for: ' + period, 'info');
+  }
+
+  // ── FILE UPLOAD ──
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.remove('drag-over');
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    if (files.length) previewFiles(files);
+  }
+  function handleFileSelect(e) {
+    const files = Array.from(e.target.files);
+    if (files.length) previewFiles(files);
+  }
+  function previewFiles(files) {
+    if (files.length === 1) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('preview-img').src = e.target.result;
+        document.getElementById('upload-preview').style.display = 'block';
+        document.getElementById('preview-grid').style.display = 'none';
+      };
+      reader.readAsDataURL(files[0]);
+    } else {
+      document.getElementById('upload-preview').style.display = 'none';
+      const grid = document.getElementById('preview-grid');
+      grid.style.display = 'grid'; grid.innerHTML = '';
+      files.slice(0,6).forEach(f => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.cssText = 'width:100%;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--glass-border);';
+          grid.appendChild(img);
+        };
+        reader.readAsDataURL(f);
+      });
+    }
+    showToast(`📸 ${files.length} photo(s) loaded! Fill details and submit.`, 'success');
+  }
+  function removePreview() {
+    document.getElementById('upload-preview').style.display = 'none';
+    document.getElementById('preview-grid').style.display = 'none';
+    document.getElementById('file-input').value = '';
+  }
+
+  // ── LOCATION ──
+  function detectLocation() {
+    document.getElementById('detect-btn').textContent = '...';
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        document.getElementById('pin-addr').textContent = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+        document.getElementById('pin-sub').textContent = 'GPS detected · High accuracy';
+        document.getElementById('detect-btn').textContent = '✓ Set';
+        showToast('📍 Location detected via GPS!', 'success');
+      }, () => {
+        document.getElementById('pin-addr').textContent = 'Bengaluru, Karnataka';
+        document.getElementById('pin-sub').textContent = 'City-level · Refine by typing address';
+        document.getElementById('detect-btn').textContent = 'Retry';
+        showToast('📍 Using city-level location', 'info');
+      });
+    }
+  }
+
+  // ── SEVERITY / CATEGORY ──
+  function selectSev(el, cls) {
+    document.querySelectorAll('.sev-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+  function selectCat(el) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── SUBMIT REPORT ──
+  function submitReport() {
+    const sev = document.querySelector('.sev-pill.selected');
+    if (!sev) { showToast('⚠️ Please select a severity level', 'warn'); return; }
+    const area = document.getElementById('report-area').value;
+    if (!area) { showToast('⚠️ Please select your area', 'warn'); return; }
+    const id = 'RPT-2025-0' + Math.floor(Math.random()*900+100);
+    document.getElementById('tracking-id').textContent = id;
+    document.getElementById('report-form-wrap').style.display = 'none';
+    document.querySelectorAll('.report-grid > .report-card')[0].style.display = 'none';
+    const sc = document.getElementById('success-card');
+    sc.style.display = 'flex'; sc.style.flexDirection = 'column'; sc.style.alignItems = 'center';
+    showToast('🚀 Report ' + id + ' submitted!', 'success');
+    // Bump counter
+    const el = document.getElementById('ctr-reports');
+    el.textContent = (parseInt(el.textContent.replace(',','')) + 1).toLocaleString();
+  }
+  function resetReport() {
+    document.getElementById('report-form-wrap').style.display = 'block';
+    document.querySelectorAll('.report-grid > .report-card')[0].style.display = 'block';
+    document.getElementById('success-card').style.display = 'none';
+    clearForm();
+  }
+  function clearForm() {
+    document.getElementById('report-desc').value = '';
+    document.getElementById('report-address').value = '';
+    document.getElementById('report-area').value = '';
+    document.querySelectorAll('.sev-pill').forEach(p => p.classList.remove('selected'));
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    removePreview();
+  }
+
+  // ── VOLUNTEER SUBMIT ──
+  function submitVolunteer() {
+    const fname = document.getElementById('vol-fname').value.trim();
+    const email = document.getElementById('vol-email').value.trim();
+    const area  = document.getElementById('vol-area').value;
+    const role  = document.getElementById('vol-role').value;
+    if (!fname) { showToast('⚠️ Please enter your first name', 'warn'); return; }
+    if (!email || !email.includes('@')) { showToast('⚠️ Please enter a valid email', 'warn'); return; }
+    if (!area)  { showToast('⚠️ Please select your locality', 'warn'); return; }
+    if (!role)  { showToast('⚠️ Please select a volunteer role', 'warn'); return; }
+    const vid = 'VOL-2025-0' + Math.floor(Math.random()*900+100);
+    document.getElementById('vol-id').textContent = vid;
+    document.getElementById('vol-form-wrap').style.display = 'none';
+    const vs = document.getElementById('vol-success');
+    vs.style.display = 'flex'; vs.style.flexDirection = 'column'; vs.style.alignItems = 'center';
+    showToast('🌿 Welcome to EcoSense, ' + fname + '!', 'success');
+  }
+  function resetVol() {
+    document.getElementById('vol-form-wrap').style.display = 'block';
+    document.getElementById('vol-success').style.display = 'none';
+    ['vol-fname','vol-lname','vol-email','vol-phone','vol-why'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('vol-area').value = '';
+    document.getElementById('vol-role').value = '';
+  }
+
+  // ── DAY TOGGLE ──
+  function toggleDay(el) { el.classList.toggle('active'); }
+
+  // ── JOIN DRIVE ──
+  function joinDrive(btn) {
+    if (btn.classList.contains('joined')) {
+      btn.classList.remove('joined'); btn.textContent = 'Join';
+      showToast('👋 Removed from cleanup drive', 'info');
+    } else {
+      btn.classList.add('joined'); btn.textContent = '✓ Joined';
+      showToast('✅ You\'re signed up for the drive!', 'success');
+    }
+  }
+
+  // ── TOAST ──
+  function showToast(msg, type='info') {
+    const container = document.getElementById('toast-container');
+    const icons = { success:'✅', info:'ℹ️', warn:'⚠️', error:'❌' };
+    const colors= { success:'var(--green-core)', info:'#60a5fa', warn:'var(--amber)', error:'var(--red)' };
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.borderLeftColor = colors[type];
+    toast.style.borderLeftWidth = '3px';
+    toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${msg}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.transition = 'all 0.4s';
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(30px)';
+      setTimeout(() => toast.remove(), 400);
+    }, 3500);
+  }
+
+  // ── ACTIVE NAV LINK ──
+  const sections = document.querySelectorAll('section');
+  const navLinks = document.querySelectorAll('.nav-links a:not(.nav-btn)');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) cur = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+    });
+  }, { passive:true });
+
+  // ── WELCOME TOAST ──
+  setTimeout(() => showToast('🌿 Welcome back! 3 new issues in your area.', 'success'), 800);
+  setTimeout(() => showToast('🚨 Critical: 5th Block Main Road needs urgent attention.', 'warn'), 2200);
+
+  // ── GOOGLE MAPS FALLBACK ──
+  // Show placeholder if Maps API fails to load
+  window.gm_authFailure = function() {
+    document.getElementById('map-placeholder').style.display = 'flex';
+    document.getElementById('gmap').style.display = 'none';
+    showToast('⚠️ Add your Google Maps API key to enable the live heatmap', 'warn');
+  };
+  // If Maps doesn't load at all (no key)
+  setTimeout(() => {
+    if (!window.google) {
+      document.getElementById('map-placeholder').style.display = 'flex';
+      document.getElementById('gmap').style.display = 'none';
+    }
+  }, 3000);
+</script>
+
+</body>
+</html>
