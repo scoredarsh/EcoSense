@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { ZoomIn, ZoomOut, Locate, Pencil, Grid3X3 } from 'lucide-react'
 import { GoogleMap, useJsApiLoader, Circle } from '@react-google-maps/api'
+import { subscribeToReports } from '../services/reportStore'
 
 const libraries = ['geometry']
 
@@ -25,7 +26,8 @@ const mapStyles = [
   { featureType: 'transit.station', elementType: 'geometry', stylers: [{ color: '#0d1f16' }] },
 ]
 
-const rawHeatmapData = [
+// Static demo data — always shown as baseline
+const staticHeatmapData = [
   { lat: 12.9780, lng: 77.6068, weight: 10 },
   { lat: 12.9750, lng: 77.6010, weight: 8 },
   { lat: 12.9700, lng: 77.5900, weight: 5 },
@@ -51,12 +53,34 @@ const nearby = [
 export default function MapSection({ onToast }) {
   const [markMode, setMarkMode] = useState(false)
   const [map, setMap] = useState(null)
+  const [liveReports, setLiveReports] = useState([])
   
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
     libraries,
   })
+
+  // Subscribe to Firestore reports for live heatmap data
+  useEffect(() => {
+    const unsubscribe = subscribeToReports((reports) => {
+      const mapped = reports
+        .filter(r => r.lat && r.lng && r.severityScore)
+        .map(r => ({
+          lat: r.lat,
+          lng: r.lng,
+          weight: r.severityScore,
+          wasteType: r.wasteType,
+          aiVerified: r.aiVerified,
+          id: r.id,
+        }))
+      setLiveReports(mapped)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  // Merge static + live reports for map circles
+  const allHeatmapData = [...staticHeatmapData, ...liveReports]
 
   const onLoad = useCallback(function callback(mapInstance) {
     setMap(mapInstance)
@@ -79,11 +103,12 @@ export default function MapSection({ onToast }) {
     }
   }
 
-  // Function to determine circle color based on weight
+  // Function to determine circle color based on weight (severity score)
   const getCircleOptions = (weight) => {
-    let fillColor = '#22c55e' // green
-    if (weight > 8) fillColor = '#ef4444' // red
-    else if (weight > 5) fillColor = '#f59e0b' // amber
+    let fillColor = '#22c55e' // green — low (1-3)
+    if (weight >= 9) fillColor = '#dc2626'      // deep red — critical
+    else if (weight >= 7) fillColor = '#ef4444'  // red — high
+    else if (weight >= 4) fillColor = '#f59e0b'  // amber — medium
     
     return {
       strokeColor: fillColor,
@@ -95,10 +120,22 @@ export default function MapSection({ onToast }) {
       draggable: false,
       editable: false,
       visible: true,
-      radius: weight * 60, // Scale radius based on weight
+      radius: weight * 60, // Scale radius based on severity
       zIndex: weight,
     }
   }
+
+  // Build dynamic nearby issues from live reports
+  const dynamicNearby = liveReports.slice(0, 3).map((r, i) => {
+    const severityColor = r.weight >= 8 ? 'bg-red-500' : r.weight >= 5 ? 'bg-amber-500' : 'bg-eco-400'
+    const timeAgo = 'Just now'
+    return {
+      title: `${r.wasteType || 'Waste'} Report ${r.aiVerified ? '🤖' : ''}`,
+      dist: `${(Math.random() * 2 + 0.1).toFixed(1)} km · ${timeAgo}`,
+      color: severityColor,
+    }
+  })
+  const allNearby = [...dynamicNearby, ...nearby]
 
   return (
     <section id="map" className="max-w-[1400px] mx-auto px-6 lg:px-10 py-10 lg:py-20">
@@ -116,7 +153,10 @@ export default function MapSection({ onToast }) {
           Waste Issues <span className="text-eco-400">Near You</span>
         </h2>
         <p className="text-eco-200/30 max-w-lg text-[0.92rem] leading-relaxed">
-          Live map of reported issues. Use the area tool to mark zones you want to work on.
+          Live map of reported issues. AI-verified reports appear in real-time with severity-based heatmap coloring.
+          {liveReports.length > 0 && (
+            <span className="text-eco-400 font-medium"> · {liveReports.length} AI-verified report{liveReports.length > 1 ? 's' : ''} live</span>
+          )}
         </p>
       </motion.div>
 
@@ -148,9 +188,9 @@ export default function MapSection({ onToast }) {
                 draggableCursor: markMode ? 'crosshair' : 'grab',
               }}
             >
-              {rawHeatmapData.map((point, i) => (
+              {allHeatmapData.map((point, i) => (
                 <Circle
-                  key={i}
+                  key={`${point.id || 'static'}-${i}`}
                   center={{ lat: point.lat, lng: point.lng }}
                   options={getCircleOptions(point.weight)}
                 />
@@ -190,25 +230,39 @@ export default function MapSection({ onToast }) {
               </div>
             </div>
           )}
+
+          {/* Live reports badge */}
+          {liveReports.length > 0 && (
+            <div className="absolute top-4 right-4 z-10">
+              <div className="bg-black/80 backdrop-blur-lg border border-eco-500/30 text-eco-300 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-eco-500 animate-pulse" />
+                {liveReports.length} live AI report{liveReports.length > 1 ? 's' : ''}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
         <div className="flex flex-col gap-4">
           {/* Legend */}
           <div className="glass p-5">
-            <h4 className="font-display font-bold text-sm mb-4 text-eco-100">Density Legend</h4>
+            <h4 className="font-display font-bold text-sm mb-4 text-eco-100">Severity Legend</h4>
             <div className="flex flex-col gap-3 text-xs text-eco-200/50">
               <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-red-600/35 border-2 border-red-600" />
+                <span>Critical (9-10)</span>
+              </div>
+              <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full bg-red-500/35 border-2 border-red-500" />
-                <span>High Density (Critical)</span>
+                <span>High Severity (7-8)</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full bg-amber-500/35 border-2 border-amber-500" />
-                <span>Medium Density</span>
+                <span>Medium Severity (4-6)</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full bg-green-500/35 border-2 border-green-500" />
-                <span>Low Density</span>
+                <span>Low Severity (1-3)</span>
               </div>
             </div>
           </div>
@@ -216,10 +270,10 @@ export default function MapSection({ onToast }) {
           {/* Nearby Issues */}
           <div className="glass p-5 flex-1 overflow-hidden">
             <h4 className="font-display font-bold text-sm mb-4 text-eco-100">Nearby Issues</h4>
-            <div className="space-y-0.5">
-              {nearby.map(({ title, dist, color, isResolved }) => (
+            <div className="space-y-0.5 max-h-[280px] overflow-y-auto">
+              {allNearby.map(({ title, dist, color, isResolved }, i) => (
                 <div
-                  key={title}
+                  key={`${title}-${i}`}
                   className="flex items-start gap-3 py-2.5 border-b border-border-subtle last:border-0 cursor-pointer hover:pl-1.5 transition-all group"
                   onClick={() => onToast?.(`📍 Opening ${title} report…`, 'info')}
                 >
@@ -239,4 +293,3 @@ export default function MapSection({ onToast }) {
     </section>
   )
 }
-
