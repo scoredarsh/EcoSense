@@ -8,6 +8,7 @@ import {
   where,
   limit,
   getDocs,
+  getDocsFromServer,
   doc,
   updateDoc,
   setDoc,
@@ -34,6 +35,8 @@ export async function saveReport(report) {
 
 /**
  * Check whether the user is allowed to submit a new report (4-day cooldown).
+ * Uses getDocsFromServer to ALWAYS hit the server — getDocs silently returns
+ * stale/empty cache data when offline, which would bypass the cooldown.
  * @param {string} uid - Firebase user UID
  * @returns {Promise<{allowed: boolean, nextAllowedDate: Date|null, lastReportDate: Date|null}>}
  */
@@ -46,7 +49,12 @@ export async function canUserReport(uid) {
       collection(db, REPORTS_COLLECTION),
       where('reporterUid', '==', uid)
     )
-    const snapshot = await getDocs(q)
+
+    // CRITICAL: Use getDocsFromServer instead of getDocs.
+    // getDocs returns cached data when offline (empty snapshot, no error),
+    // which silently bypasses cooldown. getDocsFromServer throws when
+    // the server is unreachable, triggering our fail-closed catch block.
+    const snapshot = await getDocsFromServer(q)
 
     if (snapshot.empty) {
       return { allowed: true, nextAllowedDate: null, lastReportDate: null }
@@ -54,8 +62,8 @@ export async function canUserReport(uid) {
 
     // Find the most recent report client-side
     let latestDate = null
-    snapshot.docs.forEach(doc => {
-      const data = doc.data()
+    snapshot.docs.forEach(docSnap => {
+      const data = docSnap.data()
       const d = data.createdAt?.toDate?.() || null
       if (d && (!latestDate || d > latestDate)) latestDate = d
     })
@@ -74,8 +82,9 @@ export async function canUserReport(uid) {
     }
   } catch (error) {
     console.error('Error checking report cooldown:', error)
-    // If index is missing or query fails, allow the report
-    return { allowed: true, nextAllowedDate: null, lastReportDate: null }
+    // Fail CLOSED — if we can't verify cooldown status, block submission
+    // to prevent abuse. The UI will show a retry option.
+    return { allowed: false, nextAllowedDate: null, lastReportDate: null, checkFailed: true }
   }
 }
 

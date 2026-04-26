@@ -56,16 +56,21 @@ export default function ReportSection({ onToast }) {
   const [imageBase64, setImageBase64] = useState(null)
 
   // Check cooldown on mount / user change
-  useEffect(() => {
+  const recheckCooldown = async () => {
     if (!user?.uid) { setCooldownChecked(true); return }
-    let cancelled = false
-    canUserReport(user.uid).then(result => {
-      if (!cancelled) {
-        setCooldown(result)
-        setCooldownChecked(true)
-      }
-    })
-    return () => { cancelled = true }
+    setCooldownChecked(false)
+    try {
+      const result = await canUserReport(user.uid)
+      setCooldown(result)
+    } catch {
+      setCooldown({ allowed: false, nextAllowedDate: null, lastReportDate: null, checkFailed: true })
+    } finally {
+      setCooldownChecked(true)
+    }
+  }
+
+  useEffect(() => {
+    recheckCooldown()
   }, [user?.uid])
 
   // Shared analysis logic — callable from handleFile and retry button
@@ -116,6 +121,10 @@ export default function ReportSection({ onToast }) {
   const handleSubmit = async () => {
     if (!cooldown.allowed) {
       onToast?.('⏳ You can only submit 1 report every 4 days. Please wait.', 'warn')
+      return
+    }
+    if (!aiAnalysis?.success || !aiAnalysis?.isGarbage) {
+      onToast?.('❌ Please upload a valid garbage image verified by AI before submitting.', 'warn')
       return
     }
     if (!severity) {
@@ -196,20 +205,18 @@ export default function ReportSection({ onToast }) {
       const docId = await saveReport(reportData)
       const trackingId = `RPT-${docId.slice(0, 8).toUpperCase()}`
       onToast?.(`🚀 Report submitted! Tracking ID: ${trackingId}`, 'success')
+
+      // Clear form and activate cooldown only after confirmed Firestore save
+      setDescription('')
+      setSeverity('')
+      setPreview(null)
+      setAiAnalysis(null)
+      setImageBase64(null)
+      setCooldown({ allowed: false, nextAllowedDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), lastReportDate: new Date() })
     } catch (err) {
       console.error('Firestore save error:', err)
-      const id = `RPT-2024-0${Math.floor(Math.random() * 100 + 880)}`
-      onToast?.(`🚀 Report submitted locally! Tracking ID: ${id}`, 'success')
+      onToast?.('❌ Failed to save report. Please check your connection and try again.', 'error')
     }
-
-    setDescription('')
-    setSeverity('')
-    setPreview(null)
-    setAiAnalysis(null)
-    setImageBase64(null)
-
-    // Refresh cooldown state after successful submit
-    setCooldown({ allowed: false, nextAllowedDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), lastReportDate: new Date() })
   }
 
   const severityInfo = aiAnalysis?.severityScore ? getSeverityColor(aiAnalysis.severityScore) : null
@@ -236,8 +243,38 @@ export default function ReportSection({ onToast }) {
         </p>
       </motion.div>
 
+      {/* ═══ COOLDOWN CHECK FAILED BANNER ═══ */}
+      {user && cooldownChecked && cooldown.checkFailed && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-6 mb-2"
+        >
+          <div className="glass p-6 border border-red-500/20 relative overflow-hidden">
+            <div className="absolute -top-16 -right-16 w-48 h-48 bg-red-500/10 rounded-full blur-[60px] pointer-events-none" />
+            <div className="flex items-start gap-4 relative z-10">
+              <div className="w-12 h-12 rounded-xl bg-red-500/15 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-base text-red-300 mb-1">Cooldown Check Failed</h3>
+                <p className="text-sm text-eco-200/50 leading-relaxed mb-3">
+                  Unable to verify your report eligibility. This may be a temporary network issue.
+                </p>
+                <button
+                  onClick={recheckCooldown}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-red-500/10 border border-red-500/25 text-red-300 hover:bg-red-500/20 transition-all"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" /> Retry Check
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* ═══ COOLDOWN BANNER ═══ */}
-      {user && cooldownChecked && !cooldown.allowed && cooldown.nextAllowedDate && (
+      {user && cooldownChecked && !cooldown.allowed && !cooldown.checkFailed && cooldown.nextAllowedDate && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
