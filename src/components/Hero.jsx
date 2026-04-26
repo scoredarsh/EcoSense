@@ -89,13 +89,13 @@ export default function Hero() {
             <ArrowRight className="w-4.5 h-4.5 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          <a
-            href="#report"
+          <button
+            onClick={loginWithGoogle}
             className="flex items-center gap-2.5 px-7 py-4 rounded-full bg-gradient-to-r from-eco-700 to-eco-500 text-white font-semibold text-base shadow-[0_0_25px_rgba(34,197,94,0.2)] hover:shadow-[0_0_40px_rgba(34,197,94,0.35)] hover:-translate-y-1 transition-all duration-300"
             id="cta-report"
           >
             📸 Report a Dump
-          </a>
+          </button>
 
           <a
             href="#map"

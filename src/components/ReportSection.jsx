@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, Camera, AlertTriangle, Send, Trash2, Factory, FlaskConical, Recycle, Waves, TreePine, Bot, ShieldCheck, ShieldX, Loader2, Sparkles, RefreshCw } from 'lucide-react'
 import { analyzeWasteImage } from '../services/geminiService'
 import { saveReport } from '../services/reportStore'
+import { useAuth } from '../contexts/AuthContext'
 
 const wasteTypes = [
   { icon: Trash2, label: 'General', emoji: '🗑️' },
@@ -37,6 +38,7 @@ function getSeverityColor(score) {
 }
 
 export default function ReportSection({ onToast }) {
+  const { loginWithGoogle } = useAuth()
   const [selectedType, setSelectedType] = useState('General')
   const [severity, setSeverity] = useState('')
   const [description, setDescription] = useState('')
@@ -174,8 +176,8 @@ export default function ReportSection({ onToast }) {
         <div
           onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
           onDragLeave={() => setIsDragOver(false)}
-          onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files[0]) }}
-          onClick={() => fileRef.current?.click()}
+          onDrop={(e) => { e.preventDefault(); setIsDragOver(false); loginWithGoogle() }}
+          onClick={loginWithGoogle}
           className={`relative cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-300 p-14 text-center group ${
             isDragOver
               ? 'border-eco-400 bg-eco-400/[0.05] scale-[1.01]'
@@ -238,7 +240,7 @@ export default function ReportSection({ onToast }) {
             {wasteTypes.map(({ label, emoji }) => (
               <button
                 key={label}
-                onClick={() => setSelectedType(label)}
+                onClick={loginWithGoogle}
                 className={`px-4 py-2 rounded-full text-xs font-medium border transition-all duration-200 ${
                   selectedType === label
                     ? 'border-eco-400 text-eco-300 bg-eco-400/[0.08]'
@@ -277,9 +279,8 @@ export default function ReportSection({ onToast }) {
 
           {/* Submit */}
           <button
-            onClick={handleSubmit}
-            disabled={isAnalyzing}
-            className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl bg-gradient-to-r from-eco-600 to-eco-400 text-white font-semibold hover:shadow-[0_0_25px_rgba(34,197,94,0.25)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            onClick={loginWithGoogle}
+            className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl bg-gradient-to-r from-eco-600 to-eco-400 text-white font-semibold hover:shadow-[0_0_25px_rgba(34,197,94,0.25)] hover:-translate-y-0.5 transition-all duration-300"
             id="btn-submit-report"
           >
             <Send className="w-4 h-4" />
@@ -466,7 +467,7 @@ export default function ReportSection({ onToast }) {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        if (imageBase64) runAnalysis(imageBase64)
+                        loginWithGoogle()
                       }}
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-300 hover:bg-amber-500/20 transition-all"
                     >

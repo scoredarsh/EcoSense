@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useAuth } from '../contexts/AuthContext'
 
 const opportunities = [
   {
@@ -37,6 +38,7 @@ const opportunities = [
 const statusDot = { green: '🟢', amber: '🟡', red: '🔴' }
 
 export default function VolunteerSection({ onToast }) {
+  const { loginWithGoogle } = useAuth()
   const [toggled, setToggled] = useState({})
 
   const toggle = (title) => {
@@ -86,11 +88,12 @@ export default function VolunteerSection({ onToast }) {
           <motion.div
             key={opp.title}
             variants={item}
+            onClick={loginWithGoogle}
             className="glass relative p-7 group cursor-pointer hover:-translate-y-1.5 hover:border-eco-400/30 hover:shadow-[0_0_30px_rgba(34,197,94,0.12)] transition-all duration-300"
           >
             {/* Toggle */}
             <button
-              onClick={(e) => { e.stopPropagation(); toggle(opp.title) }}
+              onClick={(e) => { e.stopPropagation(); loginWithGoogle() }}
               className={`absolute top-5 right-5 w-10 h-[22px] rounded-full border transition-all duration-300 ${
                 toggled[opp.title]
                   ? 'bg-eco-400 border-eco-400 shadow-[0_0_12px_rgba(34,197,94,0.3)]'

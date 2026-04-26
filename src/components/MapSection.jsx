@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { ZoomIn, ZoomOut, Locate, Pencil, Grid3X3 } from 'lucide-react'
 import { GoogleMap, useJsApiLoader, Circle } from '@react-google-maps/api'
 import { subscribeToReports } from '../services/reportStore'
+import { useAuth } from '../contexts/AuthContext'
 
 const libraries = ['geometry']
 
@@ -51,6 +52,7 @@ const nearby = [
 ]
 
 export default function MapSection({ onToast }) {
+  const { loginWithGoogle } = useAuth()
   const [markMode, setMarkMode] = useState(false)
   const [map, setMap] = useState(null)
   const [liveReports, setLiveReports] = useState([])
@@ -275,7 +277,7 @@ export default function MapSection({ onToast }) {
                 <div
                   key={`${title}-${i}`}
                   className="flex items-start gap-3 py-2.5 border-b border-border-subtle last:border-0 cursor-pointer hover:pl-1.5 transition-all group"
-                  onClick={() => onToast?.(`📍 Opening ${title} report…`, 'info')}
+                  onClick={loginWithGoogle}
                 >
                   <div className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${color}`} />
                   <div>
