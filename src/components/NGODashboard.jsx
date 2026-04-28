@@ -6,6 +6,10 @@ export default function NGODashboard() {
   const { logout, user } = useAuth()
 
   useEffect(() => {
+    // Expose environment variables to the iframe
+    window.ENV_FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY
+    window.ENV_GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+
     const iframe = iframeRef.current
     if (!iframe) return
 
